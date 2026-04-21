@@ -660,6 +660,7 @@
     .tk-chg { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-variant-numeric: tabular-nums; }
     .tk-up   { color: #22e87a; background: rgba(34,232,122,.1); }
     .tk-down { color: #ff5577; background: rgba(255,85,119,.1); }
+    .tk-img  { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
     /* ─────────────────────────────────────────────────────────
        NEW: PARTNERS / BACKERS MARQUEE
@@ -2324,7 +2325,8 @@
       document.getElementById('fs').style.display = 'block';
       form.reset();
     } catch (ex) {
-      err.textContent = 'Something went wrong: ' + ex.message + '. Please try again or email us directly.';
+      err.innerHTML = 'Something went wrong: ' + ex.message
+        + '. Please try again or <a href="mailto:careers@arclightlabs.xyz?subject=Job%20Application" style="color:#38d9ff;text-decoration:underline">email us directly</a>.';
       err.style.display = 'block';
     } finally {
       btn.disabled = false;
@@ -2471,50 +2473,181 @@
   })();
 
   /* ─────────────────────────────────────────────────────────
-     LIVE PRICE TICKER
+     LIVE PRICE TICKER  — Binance WS prices + CoinGecko logos
      ───────────────────────────────────────────────────────── */
   (() => {
+    // CoinGecko ID → coin metadata. logo populated dynamically from API.
+    const CG_MAP = {
+      'bitcoin':     'BTC',
+      'ethereum':    'ETH',
+      'solana':      'SOL',
+      'usd-coin':    'USDC',
+      'avalanche-2': 'AVAX',
+      'chainlink':   'LINK',
+      'uniswap':     'UNI',
+      'arbitrum':    'ARB',
+      'optimism':    'OP',
+      'cosmos':      'ATOM',
+      'polkadot':    'DOT',
+    };
+
+    // Coin list — price/chg null = show ··· until live data
     const coins = [
-      { sym:'ARC',  name:'Arc Light',     price: 4.82,    chg: +12.4, color1:'#1a6fff', color2:'#38d9ff' },
-      { sym:'BTC',  name:'Bitcoin',       price: 98234.18,chg: +2.1,  color1:'#f7931a', color2:'#ffb84d' },
-      { sym:'ETH',  name:'Ethereum',      price: 3812.42, chg: -0.8,  color1:'#627eea', color2:'#8b9df0' },
-      { sym:'SOL',  name:'Solana',        price: 187.55,  chg: +4.6,  color1:'#9945ff', color2:'#14f195' },
-      { sym:'USDC', name:'USD Coin',      price: 1.0001,  chg: +0.01, color1:'#2775ca', color2:'#5b9ed8' },
-      { sym:'AVAX', name:'Avalanche',     price: 38.92,   chg: -1.4,  color1:'#e84142', color2:'#ff6b6c' },
-      { sym:'LINK', name:'Chainlink',     price: 22.18,   chg: +3.2,  color1:'#2a5ada', color2:'#5b85e5' },
-      { sym:'UNI',  name:'Uniswap',       price: 12.74,   chg: +1.8,  color1:'#ff007a', color2:'#ff5ba7' },
-      { sym:'ARB',  name:'Arbitrum',      price: 0.84,    chg: -2.3,  color1:'#28a0f0', color2:'#5cc1ff' },
-      { sym:'OP',   name:'Optimism',      price: 1.92,    chg: +5.7,  color1:'#ff0420', color2:'#ff5466' },
-      { sym:'ATOM', name:'Cosmos',        price: 7.45,    chg: +0.6,  color1:'#2e3148', color2:'#6f7390' },
-      { sym:'DOT',  name:'Polkadot',      price: 6.18,    chg: -1.1,  color1:'#e6007a', color2:'#ff5ab1' },
+      { sym:'ARC',  name:'Arc Light', color1:'#1a6fff', color2:'#38d9ff', price:4.82,  chg:+12.4, bnSym:null,        logo:null },
+      { sym:'BTC',  name:'Bitcoin',   color1:'#f7931a', color2:'#ffb84d', price:null,  chg:null,  bnSym:'BTCUSDT',   logo:null },
+      { sym:'ETH',  name:'Ethereum',  color1:'#627eea', color2:'#8b9df0', price:null,  chg:null,  bnSym:'ETHUSDT',   logo:null },
+      { sym:'SOL',  name:'Solana',    color1:'#9945ff', color2:'#14f195', price:null,  chg:null,  bnSym:'SOLUSDT',   logo:null },
+      { sym:'USDC', name:'USD Coin',  color1:'#2775ca', color2:'#5b9ed8', price:1.0001,chg:0.01,  bnSym:null,        logo:null },
+      { sym:'AVAX', name:'Avalanche', color1:'#e84142', color2:'#ff6b6c', price:null,  chg:null,  bnSym:'AVAXUSDT',  logo:null },
+      { sym:'LINK', name:'Chainlink', color1:'#2a5ada', color2:'#5b85e5', price:null,  chg:null,  bnSym:'LINKUSDT',  logo:null },
+      { sym:'UNI',  name:'Uniswap',   color1:'#ff007a', color2:'#ff5ba7', price:null,  chg:null,  bnSym:'UNIUSDT',   logo:null },
+      { sym:'ARB',  name:'Arbitrum',  color1:'#28a0f0', color2:'#5cc1ff', price:null,  chg:null,  bnSym:'ARBUSDT',   logo:null },
+      { sym:'OP',   name:'Optimism',  color1:'#ff0420', color2:'#ff5466', price:null,  chg:null,  bnSym:'OPUSDT',    logo:null },
+      { sym:'ATOM', name:'Cosmos',    color1:'#6f7390', color2:'#9ea3c0', price:null,  chg:null,  bnSym:'ATOMUSDT',  logo:null },
+      { sym:'DOT',  name:'Polkadot',  color1:'#e6007a', color2:'#ff5ab1', price:null,  chg:null,  bnSym:'DOTUSDT',   logo:null },
     ];
-    const fmtP = p => p >= 1000 ? p.toLocaleString(undefined,{maximumFractionDigits:0})
-                   : p >= 1    ? p.toFixed(2)
-                              : p.toFixed(4);
-    const make = c => {
-      const up = c.chg >= 0;
+
+    const fmtP = p => p === null ? '···'
+                    : p >= 1000  ? p.toLocaleString(undefined, { maximumFractionDigits: 0 })
+                    : p >= 1     ? p.toFixed(2)
+                                 : p.toFixed(4);
+    const fmtC = c => c === null ? '···'
+                    : (c >= 0 ? '▲ +' : '▼ ') + Math.abs(c).toFixed(2) + '%';
+
+    const makeIcon = c => c.logo
+      ? `<img class="tk-img" data-logo="${c.sym}" src="${c.logo}" alt="${c.sym}">`
+      : `<div class="tk-icon" data-logo="${c.sym}" style="background:linear-gradient(135deg,${c.color1},${c.color2})">${c.sym[0]}</div>`;
+
+    const makeItem = c => {
+      const up = c.chg === null || c.chg >= 0;
       return `<div class="tk-item">
-        <div class="tk-icon" style="background:linear-gradient(135deg,${c.color1},${c.color2})">${c.sym[0]}</div>
+        ${makeIcon(c)}
         <div class="tk-sym">${c.sym}</div>
         <div class="tk-price" data-sym="${c.sym}">$${fmtP(c.price)}</div>
-        <div class="tk-chg ${up?'tk-up':'tk-down'}">${up?'▲':'▼'} ${Math.abs(c.chg).toFixed(2)}%</div>
+        <div class="tk-chg ${up ? 'tk-up' : 'tk-down'}" data-chg="${c.sym}">${fmtC(c.chg)}</div>
       </div>`;
     };
-    const track = document.getElementById('tickerTrack');
-    const html = coins.map(make).join('');
-    track.innerHTML = html + html; // duplicate for seamless loop
 
-    // Simulate live price ticks
+    const track = document.getElementById('tickerTrack');
+
+    function render() {
+      const html = coins.map(makeItem).join('');
+      track.innerHTML = html + html; // duplicate for seamless marquee
+    }
+    render();
+
+    // In-place price update — doesn't interrupt scroll animation
+    function updateEl(sym) {
+      const c = coins.find(x => x.sym === sym);
+      if (!c) return;
+      const up = c.chg === null || c.chg >= 0;
+      document.querySelectorAll(`.tk-price[data-sym="${sym}"]`).forEach(el => {
+        el.textContent = '$' + fmtP(c.price);
+      });
+      document.querySelectorAll(`.tk-chg[data-chg="${sym}"]`).forEach(el => {
+        el.className = `tk-chg ${up ? 'tk-up' : 'tk-down'}`;
+        el.textContent = fmtC(c.chg);
+      });
+    }
+
+    // In-place logo swap — replaces letter circle with real icon without re-render
+    function updateLogo(sym) {
+      const c = coins.find(x => x.sym === sym);
+      if (!c || !c.logo) return;
+      document.querySelectorAll(`[data-logo="${sym}"]`).forEach(el => {
+        if (el.tagName === 'IMG') {
+          el.src = c.logo; // already an img, just update src
+        } else {
+          // replace the letter div with an img in-place
+          const img = document.createElement('img');
+          img.className  = 'tk-img';
+          img.dataset.logo = sym;
+          img.alt        = sym;
+          img.src        = c.logo;
+          img.onerror    = () => {}; // keep letter on broken image
+          el.replaceWith(img);
+        }
+      });
+    }
+
+    // ── 1. CoinGecko: fetch real logo URLs + prices as fallback ──
+    async function fetchCoinGecko() {
+      try {
+        const ids = Object.keys(CG_MAP).join(',');
+        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&price_change_percentage=24h`;
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        data.forEach(item => {
+          const sym = CG_MAP[item.id];
+          const c   = coins.find(x => x.sym === sym);
+          if (!c) return;
+          // Always grab the logo — these URLs come straight from CoinGecko's CDN
+          if (item.image && item.image !== 'missing_large.png') {
+            c.logo = item.image;
+            updateLogo(sym);
+          }
+          // Only use CG prices if Binance hasn't loaded yet
+          if (c.price === null) {
+            c.price = item.current_price;
+            c.chg   = item.price_change_percentage_24h ?? 0;
+            updateEl(sym);
+          }
+        });
+      } catch(e) {}
+    }
+    fetchCoinGecko();
+
+    // ── 2. Binance REST: authoritative prices on load ──
+    async function fetchBinanceREST() {
+      try {
+        const syms = coins.filter(c => c.bnSym).map(c => `"${c.bnSym}"`).join(',');
+        const res  = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${syms}]`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        data.forEach(item => {
+          const c = coins.find(x => x.bnSym === item.symbol);
+          if (!c) return;
+          c.price = parseFloat(item.lastPrice);
+          c.chg   = parseFloat(item.priceChangePercent);
+          updateEl(c.sym);
+        });
+      } catch(e) {}
+    }
+    fetchBinanceREST();
+
+    // ── 3. Binance WebSocket: truly live streaming ──
+    function connectWS() {
+      const streams = coins
+        .filter(c => c.bnSym)
+        .map(c => c.bnSym.toLowerCase() + '@miniTicker')
+        .join('/');
+      const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+      ws.onmessage = evt => {
+        try {
+          const d = JSON.parse(evt.data).data;
+          if (!d) return;
+          const c = coins.find(x => x.bnSym === d.s);
+          if (!c) return;
+          c.price = parseFloat(d.c);
+          c.chg   = d.o > 0 ? ((parseFloat(d.c) - parseFloat(d.o)) / parseFloat(d.o)) * 100 : c.chg;
+          updateEl(c.sym);
+        } catch(e) {}
+      };
+      ws.onclose = () => setTimeout(connectWS, 3000);
+    }
+    connectWS();
+
+    // ── 4. Micro-drift for ARC + USDC (not on Binance) ──
     setInterval(() => {
-      coins.forEach(c => {
-        const drift = (Math.random() - 0.5) * c.price * 0.002;
-        c.price = Math.max(0.0001, c.price + drift);
+      ['ARC', 'USDC'].forEach(sym => {
+        const c = coins.find(x => x.sym === sym);
+        if (c && c.price !== null) {
+          c.price = Math.max(0.0001, c.price + (Math.random() - 0.5) * c.price * 0.0008);
+          updateEl(sym);
+        }
       });
-      document.querySelectorAll('.tk-price').forEach(el => {
-        const c = coins.find(x => x.sym === el.dataset.sym);
-        if (c) el.textContent = '$' + fmtP(c.price);
-      });
-    }, 2200);
+    }, 1800);
   })();
 
   /* ─────────────────────────────────────────────────────────
