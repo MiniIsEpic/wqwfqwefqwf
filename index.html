@@ -1,0 +1,2730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Arc Light Labs — sub-50ms finality, EVM-native L1 infrastructure for DeFi, games, and consumer crypto. Build at the speed of light." />
+  <meta name="theme-color" content="#050d1f" />
+  <link rel="icon" href="arc-light-logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="arc-light-logo.png" />
+  <title>Arc Light Labs — Infrastructure for the next billion onchain users</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script>
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('reduce-motion');
+  </script>
+  <style>
+    :root {
+      --cyan: #38d9ff;
+      --blue: #1a6fff;
+      --deep: #050d1f;
+      --navy: #07122b;
+      --mid:  #0a1c3e;
+      --glow: rgba(56,217,255,0.18);
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-display: 'Outfit', 'Inter', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--deep);
+      color: #e2eaff;
+      overflow-x: hidden;
+      position: relative;
+    }
+    ::selection { background: rgba(56,217,255,.35); color: #fff; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--deep); }
+    ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 2.5rem; height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background .4s, backdrop-filter .4s, border-bottom .4s, box-shadow .4s;
+    }
+    nav.scrolled {
+      background: rgba(5,13,31,.78);
+      backdrop-filter: blur(24px) saturate(1.35);
+      border-bottom: 1px solid rgba(56,217,255,.12);
+      box-shadow: 0 12px 48px rgba(0,0,0,.35);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-img {
+      width: 48px; height: 48px; flex-shrink: 0; display: block;
+      object-fit: contain;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .nav-logo--footer .nav-logo-img { width: 36px; height: 36px; }
+    .nav-logo-text { font-family: var(--font-display); font-size: 1rem; font-weight: 800; letter-spacing: .04em; color: #fff; }
+    .nav-links { display: flex; align-items: center; gap: .15rem; list-style: none; }
+    .nav-links a {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; font-size: .78rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,.55); text-decoration: none;
+      border-radius: 99px; transition: color .2s, background .2s;
+    }
+    .nav-links a::before {
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.25); flex-shrink: 0;
+      transition: border-color .2s, background .2s;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(56,217,255,.07); }
+    .nav-links a:hover::before { border-color: var(--cyan); background: var(--cyan); }
+    .nav-cta {
+      padding: 8px 22px !important;
+      background: linear-gradient(135deg, rgba(26,111,255,.3), rgba(56,217,255,.18)) !important;
+      border: 1px solid rgba(56,217,255,.3) !important; color: #fff !important;
+    }
+    .nav-cta:hover { background: linear-gradient(135deg,rgba(26,111,255,.5),rgba(56,217,255,.3)) !important; }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      overflow: hidden; text-align: center; padding: 8rem 2rem 5rem;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 68% 45%, rgba(26,111,255,.22) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 30% 65%, rgba(56,217,255,.09) 0%, transparent 60%),
+        linear-gradient(180deg, var(--navy) 0%, var(--deep) 100%);
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(56,217,255,.035) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(56,217,255,.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+    }
+    .hero-arcs { position: absolute; inset: 0; pointer-events: none; }
+    .starburst {
+      position: absolute; top: 28%; right: 26%; width: 8px; height: 8px; pointer-events: none;
+    }
+    .starburst::before, .starburst::after {
+      content: ''; position: absolute; background: white; border-radius: 99px;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+    }
+    .starburst::before { width: 1.5px; height: 56px; animation: sp 3s ease-in-out infinite; }
+    .starburst::after  { width: 56px; height: 1.5px; animation: sp 3s ease-in-out infinite .5s; }
+    .starburst-core {
+      position: absolute; inset: 0; border-radius: 50%; background: white;
+      box-shadow: 0 0 10px 4px rgba(255,255,255,.9), 0 0 35px 18px rgba(56,217,255,.7), 0 0 80px 40px rgba(26,111,255,.4);
+      animation: sp 3s ease-in-out infinite;
+    }
+    @keyframes sp { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.65;transform:scale(.8)} }
+    .particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .particle {
+      position: absolute; border-radius: 50%; background: var(--cyan); opacity: 0;
+      animation: fp var(--dur,8s) ease-in infinite var(--delay,0s);
+    }
+    @keyframes fp {
+      0%{opacity:0;transform:translateY(0) scale(0)}
+      10%{opacity:.7}
+      90%{opacity:.2}
+      100%{opacity:0;transform:translateY(-160px) scale(.3)}
+    }
+    .hero-content { position: relative; z-index: 5; max-width: 840px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 16px; background: rgba(56,217,255,.07);
+      border: 1px solid rgba(56,217,255,.22); border-radius: 99px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 1.8rem;
+    }
+    .badge-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--cyan);
+      box-shadow: 0 0 6px 2px var(--cyan); animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6.5vw, 5.2rem); font-weight: 900;
+      line-height: 1.05; letter-spacing: -.03em; color: #fff; margin-bottom: 1.4rem;
+    }
+    .hero-title .gx {
+      background: linear-gradient(130deg, #fff 0%, var(--cyan) 50%, var(--blue) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(.95rem,2vw,1.15rem); color: rgba(226,234,255,.55);
+      max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.75; font-weight: 400;
+    }
+    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 13px 32px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+      border: none; border-radius: 99px; font-size: .88rem; font-weight: 700;
+      letter-spacing: .03em; color: #fff; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 0 28px rgba(56,217,255,.28), 0 4px 18px rgba(26,111,255,.35);
+      transition: transform .2s, box-shadow .2s; position: relative; overflow: hidden;
+    }
+    .btn-primary::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,.14), transparent);
+      transform: translateX(-100%); transition: transform .5s ease;
+    }
+    .btn-primary:hover::after { transform: translateX(100%); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(56,217,255,.42), 0 8px 28px rgba(26,111,255,.45); }
+    .btn-ghost {
+      padding: 13px 32px; background: transparent;
+      border: 1px solid rgba(56,217,255,.28); border-radius: 99px;
+      font-size: .88rem; font-weight: 600; color: rgba(255,255,255,.75);
+      cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: border-color .2s, color .2s, background .2s, transform .2s;
+    }
+    .btn-ghost:hover { border-color: var(--cyan); color: #fff; background: rgba(56,217,255,.06); transform: translateY(-2px); }
+    .scroll-ind {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .scroll-ind span { font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: rgba(255,255,255,.28); }
+    .scroll-mouse {
+      width: 20px; height: 34px; border: 1.5px solid rgba(255,255,255,.18);
+      border-radius: 99px; display: flex; justify-content: center; padding-top: 5px;
+    }
+    .scroll-mouse::after {
+      content: ''; width: 2.5px; height: 7px; background: rgba(56,217,255,.65);
+      border-radius: 99px; animation: sd 2s ease-in-out infinite;
+    }
+    @keyframes sd { 0%{transform:translateY(0);opacity:1} 80%{transform:translateY(11px);opacity:0} 100%{transform:translateY(0);opacity:0} }
+
+    /* ── STATS ── */
+    .stats-band {
+      position: relative; z-index: 10;
+      border-top: 1px solid rgba(56,217,255,.09); border-bottom: 1px solid rgba(56,217,255,.09);
+      background: rgba(7,18,43,.65); backdrop-filter: blur(12px); padding: 2rem;
+    }
+    .stats-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2rem; }
+    .stat-val { font-size: 2.1rem; font-weight: 900; background: linear-gradient(135deg,#fff,var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; display:block; }
+    .stat-lbl { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.38); margin-top: 3px; }
+
+    /* ── SECTION COMMON ── */
+    section { position: relative; z-index: 10; }
+    .si { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; }
+    .sec-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .7rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 1rem;
+    }
+    .sec-label::before { content: ''; width: 24px; height: 1.5px; background: var(--cyan); }
+    .sec-title { font-family: var(--font-display); font-size: clamp(1.75rem,3.8vw,2.9rem); font-weight: 800; line-height: 1.15; letter-spacing: -.025em; color: #fff; margin-bottom: .9rem; }
+    .sec-desc { font-size: .95rem; color: rgba(226,234,255,.48); line-height: 1.75; }
+
+    /* ── SOLUTIONS ── */
+    #solutions { background: linear-gradient(180deg, var(--deep) 0%, rgba(7,18,43,.6) 100%); }
+    .sol-header { text-align: center; margin-bottom: 3.5rem; }
+    .sol-header .sec-label { justify-content: center; }
+    .sol-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    @media(max-width:860px){ .sol-grid{grid-template-columns:1fr} }
+
+    .sol-card {
+      background: rgba(255,255,255,.97); border-radius: 20px;
+      overflow: hidden; transition: transform .3s, box-shadow .3s; cursor: pointer;
+    }
+    .sol-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,.4); }
+    .sol-img {
+      width: 100%; height: 240px; display: block;
+      transition: transform .5s ease;
+    }
+    .sol-card:hover .sol-img { transform: scale(1.04); }
+    .sol-img-wrap { overflow: hidden; position: relative; }
+    .sol-img-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.12) 100%);
+    }
+    .sol-body { padding: 1.6rem 1.6rem 1.8rem; }
+    .sol-body h3 { font-size: 1.25rem; font-weight: 800; line-height: 1.2; color: #0d1117; margin-bottom: .65rem; letter-spacing: -.02em; }
+    .sol-body p { font-size: .855rem; color: #555e6e; line-height: 1.65; margin-bottom: 1.2rem; }
+    .sol-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: .8rem; font-weight: 700; color: #0d1117;
+      text-decoration: none; border: 1.5px solid #d0d5dd;
+      padding: 8px 16px; border-radius: 99px;
+      transition: border-color .2s, background .2s;
+    }
+    .sol-link:hover { border-color: #0d1117; background: #f4f6f8; }
+
+    /* ── BENEFITS ── */
+    #benefits { background: linear-gradient(180deg, rgba(7,18,43,.45) 0%, rgba(5,13,31,.75) 100%); }
+    .ben-header { text-align: center; margin-bottom: 3.5rem; }
+    .ben-header .sec-label { justify-content: center; }
+    .ben-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
+    @media(max-width:900px){ .ben-grid{grid-template-columns:1fr 1fr} }
+    @media(max-width:560px){ .ben-grid{grid-template-columns:1fr} }
+
+    .ben-card {
+      padding: 2rem; background: rgba(10,24,56,.55);
+      border: 1px solid rgba(56,217,255,.09); border-radius: 18px;
+      transition: border-color .3s, transform .3s, box-shadow .3s; position: relative; overflow: hidden;
+    }
+    .ben-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .ben-card:hover { border-color: rgba(56,217,255,.28); transform: translateY(-4px); box-shadow: 0 18px 55px rgba(56,217,255,.07); }
+    .ben-card:hover::after { opacity: 1; }
+    .ben-icon {
+      width: 46px; height: 46px; border-radius: 12px; margin-bottom: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(26,111,255,.28), rgba(56,217,255,.14));
+      border: 1px solid rgba(56,217,255,.18);
+    }
+    .ben-icon svg { width: 22px; height: 22px; }
+    .ben-title { font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: .55rem; }
+    .ben-desc  { font-size: .845rem; color: rgba(226,234,255,.48); line-height: 1.7; }
+
+    /* ── TECHNOLOGY ── */
+    #technology { background: linear-gradient(180deg, rgba(5,13,31,.75) 0%, rgba(7,18,43,.5) 100%); }
+    .tech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    @media(max-width:768px){ .tech-grid{grid-template-columns:1fr;gap:3rem} }
+    .tech-list { display: flex; flex-direction: column; gap: .9rem; margin-top: 2rem; }
+    .tech-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1.2rem 1.4rem; background: rgba(7,18,43,.6);
+      border: 1px solid rgba(56,217,255,.08); border-radius: 14px;
+      transition: border-color .3s, transform .2s;
+    }
+    .tech-item:hover { border-color: rgba(56,217,255,.24); transform: translateX(3px); }
+    .tech-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(26,111,255,.28), rgba(56,217,255,.12));
+      border: 1px solid rgba(56,217,255,.18);
+    }
+    .tech-icon img { width: 22px; height: 22px; object-fit: cover; border-radius: 4px; }
+    .tech-icon svg { width: 20px; height: 20px; }
+    .tech-item h4 { font-size: .88rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
+    .tech-item p  { font-size: .8rem; color: rgba(226,234,255,.45); line-height: 1.6; }
+
+    /* network visual */
+    .tech-visual { display: flex; align-items: center; justify-content: center; position: relative; }
+    .net-img-wrap {
+      position: relative; border-radius: 20px; overflow: hidden;
+      border: 1px solid rgba(56,217,255,.15);
+      box-shadow: 0 0 60px rgba(56,217,255,.08);
+    }
+    .net-img { width: 100%; max-width: 420px; display: block; border-radius: 20px; min-height: 380px; }
+    .net-img-overlay {
+      position: absolute; inset: 0; border-radius: 20px;
+      background: linear-gradient(160deg, rgba(26,111,255,.25) 0%, rgba(5,13,31,.55) 60%, rgba(5,13,31,.85) 100%);
+    }
+    .net-badge {
+      position: absolute; bottom: 20px; left: 20px;
+      background: rgba(5,13,31,.85); backdrop-filter: blur(12px);
+      border: 1px solid rgba(56,217,255,.2); border-radius: 12px;
+      padding: .8rem 1.1rem; display: flex; align-items: center; gap: .6rem;
+    }
+    .net-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: #22e87a; box-shadow: 0 0 8px 3px rgba(34,232,122,.5); }
+    .net-badge span { font-size: .75rem; font-weight: 700; color: #fff; }
+    .net-badge span em { color: rgba(226,234,255,.45); font-style: normal; font-weight: 400; margin-left: .25rem; }
+
+    /* ── ABOUT ── */
+    #about { background: linear-gradient(180deg, rgba(7,18,43,.55) 0%, rgba(5,13,31,.7) 100%); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    @media(max-width:768px){ .about-grid{grid-template-columns:1fr;gap:3rem} }
+    .about-img-wrap {
+      position: relative; border-radius: 20px; overflow: hidden;
+      border: 1px solid rgba(56,217,255,.14);
+      box-shadow: 0 0 70px rgba(56,217,255,.07);
+    }
+    .about-img { width: 100%; display: block; min-height: 380px; }
+    .about-img-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(160deg, rgba(56,217,255,.12) 0%, rgba(5,13,31,.6) 70%);
+    }
+    .about-stats { display: flex; gap: 2.5rem; margin-top: 2rem; flex-wrap: wrap; }
+    .a-stat-val { font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg,#fff,var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; display:block; }
+    .a-stat-lbl { font-size: .7rem; color: rgba(226,234,255,.38); text-transform: uppercase; letter-spacing:.1em; margin-top:2px; }
+
+    /* ── HOW ── */
+    #how { background: linear-gradient(180deg, rgba(5,13,31,.7) 0%, rgba(7,18,43,.5) 100%); }
+    .how-header { text-align: center; margin-bottom: 3.5rem; }
+    .how-header .sec-label { justify-content: center; }
+    .how-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; }
+    @media(max-width:900px){ .how-grid{grid-template-columns:1fr 1fr} }
+    @media(max-width:520px){ .how-grid{grid-template-columns:1fr} }
+    .how-step {
+      padding: 1.8rem; background: rgba(7,18,43,.6);
+      border: 1px solid rgba(56,217,255,.08); border-radius: 16px;
+      transition: border-color .3s, transform .3s;
+    }
+    .how-step:hover { border-color: rgba(56,217,255,.24); transform: translateY(-3px); }
+    .how-num { font-size: 2.8rem; font-weight: 900; line-height: 1; background: linear-gradient(135deg,rgba(56,217,255,.18),rgba(56,217,255,.04)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:1rem; }
+    .how-title { font-size: .9rem; font-weight: 700; color: #fff; margin-bottom: .45rem; }
+    .how-desc  { font-size: .82rem; color: rgba(226,234,255,.44); line-height: 1.65; }
+
+    /* ── CAREERS ── */
+    #careers { background: linear-gradient(180deg, rgba(7,18,43,.5) 0%, rgba(5,13,31,.92) 100%); }
+    .careers-header { text-align: center; margin-bottom: 3.5rem; }
+    .careers-header .sec-label { justify-content: center; }
+    .jobs { display: flex; flex-direction: column; gap: .9rem; margin-bottom: 3.5rem; }
+    .job-card {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 1.8rem; background: rgba(10,24,56,.5);
+      border: 1px solid rgba(56,217,255,.09); border-radius: 14px;
+      cursor: pointer; transition: border-color .25s, background .25s, transform .2s;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    .job-card:hover { border-color: rgba(56,217,255,.28); background: rgba(10,24,56,.75); transform: translateX(4px); }
+    .job-card h3 { font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
+    .job-meta { display: flex; gap: .7rem; flex-wrap: wrap; }
+    .tag { font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
+    .tag.dept { background: rgba(26,111,255,.15); color: rgba(56,217,255,.9); border: 1px solid rgba(56,217,255,.2); }
+    .tag.type, .tag.loc { background: rgba(56,217,255,.05); color: rgba(226,234,255,.5); border: 1px solid rgba(56,217,255,.1); }
+    .job-btn {
+      padding: 8px 20px; background: transparent;
+      border: 1px solid rgba(56,217,255,.28); border-radius: 99px;
+      font-size: .78rem; font-weight: 700; color: var(--cyan); cursor: pointer;
+      transition: background .2s, border-color .2s, color .2s; white-space: nowrap;
+      font-family: 'Inter',sans-serif;
+    }
+    .job-btn:hover { background: rgba(56,217,255,.1); border-color: var(--cyan); color: #fff; }
+    .open-apply {
+      text-align: center; padding: 2.5rem;
+      background: rgba(10,24,56,.4); border: 1px solid rgba(56,217,255,.1); border-radius: 16px;
+    }
+    .open-apply h3 { font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: .4rem; }
+    .open-apply p  { font-size: .855rem; color: rgba(226,234,255,.45); margin-bottom: 1.5rem; }
+
+    /* ── DISCORD ── */
+    .discord-band {
+      position: relative; z-index: 10; overflow: hidden;
+      background: linear-gradient(135deg, #1a1f8c 0%, #2a2fb5 30%, #5865f2 60%, #38d9ff 100%);
+    }
+    .discord-band::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .discord-inner {
+      max-width: 1100px; margin: 0 auto; padding: 5rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 3rem; flex-wrap: wrap; position: relative; z-index: 2;
+    }
+    .discord-left { display: flex; align-items: center; gap: 1.8rem; flex-wrap: wrap; }
+    .discord-logo {
+      width: 72px; height: 72px; background: rgba(255,255,255,.15);
+      border-radius: 20px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.2);
+      box-shadow: 0 8px 32px rgba(0,0,0,.25);
+    }
+    .discord-text h2 {
+      font-size: clamp(1.5rem, 3.5vw, 2.3rem); font-weight: 900;
+      color: #fff; line-height: 1.15; letter-spacing: -.02em; margin-bottom: .4rem;
+    }
+    .discord-text p { font-size: .95rem; color: rgba(255,255,255,.7); max-width: 420px; line-height: 1.6; }
+    .discord-members {
+      display: flex; align-items: center; gap: .5rem; margin-top: .8rem;
+    }
+    .discord-avatars { display: flex; }
+    .discord-avatars span {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid rgba(88,101,242,.8); display: block;
+      margin-left: -8px; overflow: hidden;
+      background: linear-gradient(135deg, #7289da, #5865f2);
+      font-size: .6rem; font-weight: 800; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .discord-avatars span:first-child { margin-left: 0; }
+    .discord-members-text { font-size: .8rem; color: rgba(255,255,255,.65); font-weight: 600; }
+    .discord-online { width: 7px; height: 7px; border-radius: 50%; background: #23d160; box-shadow: 0 0 6px 2px rgba(35,209,96,.5); display: inline-block; margin-right: 4px; }
+    .btn-discord {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 36px; background: #fff; border-radius: 99px;
+      font-size: 1rem; font-weight: 800; color: #5865f2;
+      text-decoration: none; letter-spacing: .01em; flex-shrink: 0;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 8px 30px rgba(0,0,0,.2);
+    }
+    .btn-discord:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 40px rgba(0,0,0,.3); }
+
+    /* ── CTA ── */
+    .cta-band { position: relative; overflow: hidden; z-index: 10; }
+    .cta-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 65% 65% at 50% 50%, rgba(26,111,255,.16) 0%, transparent 70%),
+                  linear-gradient(180deg, rgba(7,18,43,.55) 0%, rgba(5,13,31,.92) 100%);
+    }
+    .cta-inner { max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; text-align: center; position: relative; z-index: 2; }
+    .cta-title { font-family: var(--font-display); font-size: clamp(1.8rem,4vw,3.1rem); font-weight: 900; letter-spacing: -.025em; color: #fff; margin-bottom: .9rem; }
+    .cta-desc  { font-size: .95rem; color: rgba(226,234,255,.48); max-width: 460px; margin: 0 auto 2.5rem; line-height: 1.75; }
+
+    /* ── MODAL ── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(5,13,31,.88); backdrop-filter: blur(14px);
+      z-index: 200; align-items: center; justify-content: center; padding: 2rem;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: linear-gradient(155deg, rgba(10,24,56,.97), rgba(7,18,43,.99));
+      border: 1px solid rgba(56,217,255,.18); border-radius: 22px;
+      padding: 2.5rem; max-width: 540px; width: 100%;
+      max-height: 90vh; overflow-y: auto; position: relative;
+      box-shadow: 0 40px 120px rgba(0,0,0,.55), 0 0 0 1px rgba(56,217,255,.08);
+      animation: mIn .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes mIn { from{transform:scale(.88) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+    .modal-x {
+      position: absolute; top: 1.2rem; right: 1.4rem;
+      background: none; border: none; color: rgba(255,255,255,.35);
+      font-size: 1.3rem; cursor: pointer; transition: color .2s; line-height: 1;
+    }
+    .modal-x:hover { color: #fff; }
+    .modal-title { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: .35rem; }
+    .modal-role  { font-size: .75rem; color: var(--cyan); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    @media(max-width:480px){ .form-row{grid-template-columns:1fr} }
+    .fg { margin-bottom: 1.1rem; }
+    .fg label { display: block; font-size: .73rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(226,234,255,.5); margin-bottom: .4rem; }
+    .fg input, .fg select, .fg textarea {
+      width: 100%; background: rgba(5,13,31,.8);
+      border: 1px solid rgba(56,217,255,.14); border-radius: 10px;
+      padding: .72rem 1rem; font-size: .875rem; color: #fff;
+      font-family: 'Inter',sans-serif; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .fg input:focus, .fg select:focus, .fg textarea:focus {
+      border-color: rgba(56,217,255,.42);
+      box-shadow: 0 0 0 3px rgba(56,217,255,.07);
+    }
+    .fg textarea { resize: vertical; min-height: 95px; }
+    .fg input::placeholder, .fg textarea::placeholder { color: rgba(226,234,255,.18); }
+    .form-sub {
+      width: 100%; padding: 13px; margin-top: .4rem;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border: none; border-radius: 10px; font-size: .875rem; font-weight: 800;
+      color: #fff; cursor: pointer; font-family: 'Inter',sans-serif;
+      transition: opacity .2s, transform .2s; letter-spacing: .03em;
+    }
+    .form-sub:hover { opacity: .9; transform: translateY(-1px); }
+    .form-success { display: none; text-align: center; padding: 2rem 0; }
+    .fs-check { width: 58px; height: 58px; background: linear-gradient(135deg,var(--blue),var(--cyan)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; margin: 0 auto 1rem; }
+    .form-success h3 { font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: .45rem; }
+    .form-success p  { font-size: .875rem; color: rgba(226,234,255,.5); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 10;
+      border-top: 1px solid rgba(56,217,255,.07);
+      background: rgba(5,13,31,.97); padding: 3rem 2.5rem 2rem;
+    }
+    .ft-inner { max-width: 1100px; margin: 0 auto; }
+    .ft-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 3rem; flex-wrap: wrap;
+      padding-bottom: 2.5rem; border-bottom: 1px solid rgba(56,217,255,.07); margin-bottom: 1.5rem;
+    }
+    .ft-brand p { font-size: .8rem; color: rgba(226,234,255,.3); max-width: 240px; line-height: 1.65; margin-top: .75rem; }
+    .ft-links { display: flex; gap: 3.5rem; flex-wrap: wrap; }
+    .ft-col h4 { font-size: .68rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: .9rem; }
+    .ft-col ul { list-style: none; display: flex; flex-direction: column; gap: .45rem; }
+    .ft-col a { font-size: .8rem; color: rgba(226,234,255,.42); text-decoration: none; transition: color .2s; }
+    .ft-col a:hover { color: var(--cyan); }
+    .ft-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .ft-bottom p { font-size: .75rem; color: rgba(226,234,255,.22); }
+    .ft-socials { display: flex; gap: .5rem; }
+    .soc {
+      width: 30px; height: 30px; border-radius: 8px;
+      border: 1px solid rgba(56,217,255,.14); display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.38); font-size: .72rem; text-decoration: none;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .soc:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(56,217,255,.06); }
+
+    /* ── ANIMATIONS ── */
+    .fade-up { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes arcDraw {
+      from { stroke-dashoffset: 2000; opacity: 0; }
+      8%   { opacity: 1; }
+      to   { stroke-dashoffset: 0; opacity: .65; }
+    }
+    .as  { stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: arcDraw 3.5s ease-out .2s forwards; }
+    .as2 { animation-delay: .5s !important; }
+    .as3 { animation-delay: .9s !important; }
+    .as4 { animation-delay: 1.2s !important; }
+    .as5 { animation-delay: 1.5s !important; }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: PRELOADER
+       ───────────────────────────────────────────────────────── */
+    #preloader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--deep);
+      display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem;
+      transition: opacity .8s ease, visibility .8s ease;
+    }
+    #preloader.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+    .pl-logo { animation: plPulse 1.6s ease-in-out infinite; filter: drop-shadow(0 0 18px rgba(56,217,255,.55)); }
+    #preloader .nav-logo-img { width: 72px; height: 72px; border-radius: 0; }
+    @keyframes plPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.07);opacity:.75} }
+    .pl-bar { width: 200px; height: 2px; background: rgba(56,217,255,.12); border-radius: 99px; overflow: hidden; position: relative; }
+    .pl-bar::after { content: ''; position: absolute; left: -40%; top: 0; bottom: 0; width: 40%;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      animation: plSlide 1.4s ease-in-out infinite; }
+    @keyframes plSlide { to { left: 100%; } }
+    .pl-text { font-size: .65rem; letter-spacing: .25em; text-transform: uppercase; color: rgba(255,255,255,.35); font-weight: 700; }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: CURSOR GLOW
+       ───────────────────────────────────────────────────────── */
+    .cursor-glow {
+      position: fixed; top: 0; left: 0; width: 480px; height: 480px;
+      border-radius: 50%; pointer-events: none; z-index: 1;
+      background: radial-gradient(circle, rgba(56,217,255,.10) 0%, rgba(26,111,255,.04) 35%, transparent 65%);
+      transform: translate(-50%, -50%); transition: transform .15s ease-out, opacity .3s;
+      mix-blend-mode: screen; opacity: 0;
+    }
+    @media (hover: hover) { .cursor-glow { opacity: 1; } }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: AURORA ORBS (drifting glow blobs in hero bg)
+       ───────────────────────────────────────────────────────── */
+    .aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .aur-orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: .55;
+      animation: aurFloat 22s ease-in-out infinite;
+    }
+    .aur-orb.a { width: 520px; height: 520px; top: -100px; left: -120px; background: radial-gradient(circle, #1a6fff, transparent 65%); }
+    .aur-orb.b { width: 440px; height: 440px; bottom: -120px; right: -80px; background: radial-gradient(circle, #38d9ff, transparent 65%); animation-delay: -8s; }
+    .aur-orb.c { width: 360px; height: 360px; top: 30%; right: 25%; background: radial-gradient(circle, #6f42ff, transparent 65%); opacity: .35; animation-delay: -14s; }
+    @keyframes aurFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%     { transform: translate(40px,-30px) scale(1.08); }
+      66%     { transform: translate(-30px,40px) scale(.94); }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: HAMBURGER (mobile menu)
+       ───────────────────────────────────────────────────────── */
+    .hamburger {
+      display: none; width: 38px; height: 38px; border: 1px solid rgba(56,217,255,.25);
+      background: rgba(7,18,43,.6); border-radius: 10px; cursor: pointer;
+      align-items: center; justify-content: center; flex-direction: column; gap: 4px;
+      transition: border-color .2s, background .2s;
+    }
+    .hamburger:hover { border-color: var(--cyan); }
+    .hamburger span { width: 18px; height: 2px; background: #fff; border-radius: 2px; transition: transform .3s, opacity .3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    @media(max-width:880px){
+      .hamburger { display: flex; }
+      .nav-links {
+        position: fixed; top: 68px; left: 0; right: 0;
+        background: rgba(5,13,31,.97); backdrop-filter: blur(24px);
+        flex-direction: column; align-items: stretch; gap: 0;
+        padding: 1.2rem; border-bottom: 1px solid rgba(56,217,255,.12);
+        transform: translateY(-110%); transition: transform .35s cubic-bezier(.4,0,.2,1);
+      }
+      .nav-links.open { transform: translateY(0); }
+      .nav-links li { width: 100%; }
+      .nav-links a { width: 100%; padding: 14px 18px; font-size: .85rem; }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: PRICE TICKER
+       ───────────────────────────────────────────────────────── */
+    .ticker-band {
+      position: relative; z-index: 10;
+      background: rgba(5,13,31,.92); border-bottom: 1px solid rgba(56,217,255,.08);
+      overflow: hidden; padding: 14px 0;
+    }
+    .ticker-track {
+      display: flex; gap: 3rem; width: max-content;
+      animation: tickerScroll 55s linear infinite;
+    }
+    .ticker-band:hover .ticker-track { animation-play-state: paused; }
+    @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .tk-item { display: flex; align-items: center; gap: 10px; white-space: nowrap; padding: 0 .5rem; }
+    .tk-icon {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .tk-sym { font-size: .82rem; font-weight: 800; color: #fff; letter-spacing: .03em; }
+    .tk-price { font-size: .82rem; font-weight: 600; color: rgba(226,234,255,.75); font-variant-numeric: tabular-nums; }
+    .tk-chg { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+    .tk-up   { color: #22e87a; background: rgba(34,232,122,.1); }
+    .tk-down { color: #ff5577; background: rgba(255,85,119,.1); }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: PARTNERS / BACKERS MARQUEE
+       ───────────────────────────────────────────────────────── */
+    .backers {
+      position: relative; z-index: 10; padding: 4rem 0 3rem;
+      background: linear-gradient(180deg, rgba(7,18,43,.55) 0%, var(--deep) 100%);
+    }
+    .backers-label {
+      text-align: center; font-size: .68rem; font-weight: 700;
+      letter-spacing: .25em; text-transform: uppercase;
+      color: rgba(226,234,255,.32); margin-bottom: 2rem;
+    }
+    .backers-mask {
+      position: relative; overflow: hidden;
+      mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+    }
+    .backers-track { display: flex; gap: 4rem; width: max-content; animation: tickerScroll 38s linear infinite; align-items: center; }
+    .backer-logo {
+      display: flex; align-items: center; gap: .65rem;
+      color: rgba(226,234,255,.45); font-weight: 800; font-size: 1.05rem;
+      letter-spacing: -.01em; transition: color .3s, transform .3s;
+      flex-shrink: 0; padding: 0 .5rem;
+    }
+    .backer-logo:hover { color: #fff; transform: scale(1.05); }
+    .backer-logo svg { width: 26px; height: 26px; opacity: .7; transition: opacity .3s; }
+    .backer-logo:hover svg { opacity: 1; }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: LIVE NETWORK FEED
+       ───────────────────────────────────────────────────────── */
+    #live { background: linear-gradient(180deg, var(--deep) 0%, rgba(7,18,43,.5) 100%); }
+    .live-header { text-align: center; margin-bottom: 3rem; }
+    .live-header .sec-label { justify-content: center; }
+    .live-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 1.5rem; }
+    @media(max-width:880px){ .live-grid{grid-template-columns:1fr} }
+    .live-stats { display: flex; flex-direction: column; gap: 1rem; }
+    .live-stat-card {
+      padding: 1.4rem 1.5rem; background: linear-gradient(135deg, rgba(10,24,56,.7), rgba(7,18,43,.5));
+      border: 1px solid rgba(56,217,255,.1); border-radius: 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      position: relative; overflow: hidden;
+    }
+    .live-stat-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, var(--cyan), transparent);
+    }
+    .ls-label { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(226,234,255,.45); margin-bottom: 4px; font-weight: 700; }
+    .ls-value { font-size: 1.5rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+    .ls-value .unit { font-size: .8rem; font-weight: 600; color: rgba(56,217,255,.7); margin-left: 4px; }
+    .ls-pulse { width: 9px; height: 9px; border-radius: 50%; background: #22e87a; box-shadow: 0 0 10px 3px rgba(34,232,122,.55); animation: blink 1.4s ease-in-out infinite; flex-shrink: 0; }
+
+    .blocks-feed {
+      background: linear-gradient(135deg, rgba(10,24,56,.6), rgba(7,18,43,.55));
+      border: 1px solid rgba(56,217,255,.1); border-radius: 14px;
+      padding: 1.4rem; display: flex; flex-direction: column;
+    }
+    .bf-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: .9rem; margin-bottom: .9rem; border-bottom: 1px solid rgba(56,217,255,.08);
+    }
+    .bf-title { font-size: .8rem; font-weight: 800; color: #fff; letter-spacing: .04em; }
+    .bf-live { display: flex; align-items: center; gap: 6px; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #22e87a; }
+    .bf-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #22e87a; box-shadow: 0 0 8px 2px rgba(34,232,122,.55); animation: blink 1.4s ease-in-out infinite; }
+    .bf-list { display: flex; flex-direction: column; gap: .55rem; max-height: 320px; overflow: hidden; }
+    .bf-row {
+      display: grid; grid-template-columns: 80px 1fr auto auto; gap: 1rem; align-items: center;
+      padding: .65rem .8rem; background: rgba(5,13,31,.5);
+      border: 1px solid rgba(56,217,255,.06); border-radius: 8px;
+      font-size: .77rem; font-variant-numeric: tabular-nums;
+      animation: bfIn .5s ease;
+    }
+    @keyframes bfIn { from{transform:translateY(-10px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .bf-block { color: var(--cyan); font-weight: 800; }
+    .bf-hash  { color: rgba(226,234,255,.55); font-family: 'SF Mono','Menlo',monospace; font-size: .72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bf-tx    { color: rgba(226,234,255,.7); font-weight: 600; }
+    .bf-time  { color: rgba(226,234,255,.4); font-size: .7rem; }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: TOKENOMICS
+       ───────────────────────────────────────────────────────── */
+    #token { background: linear-gradient(180deg, rgba(7,18,43,.5) 0%, rgba(5,13,31,.85) 100%); }
+    .token-header { text-align: center; margin-bottom: 3.5rem; }
+    .token-header .sec-label { justify-content: center; }
+    .token-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+    @media(max-width:880px){ .token-grid{grid-template-columns:1fr;gap:3rem} }
+    .token-chart-wrap {
+      position: relative; display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .token-chart {
+      width: 320px; height: 320px; transform: rotate(-90deg);
+      filter: drop-shadow(0 0 30px rgba(56,217,255,.18));
+    }
+    .token-center {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .tc-coin {
+      width: 86px; height: 86px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 900; color: #fff;
+      box-shadow: 0 0 40px rgba(56,217,255,.45), inset 0 -8px 20px rgba(0,0,0,.25);
+      margin-bottom: .8rem; letter-spacing: .04em;
+    }
+    .tc-name { font-size: .75rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: rgba(255,255,255,.45); }
+    .tc-supply { font-size: 1.05rem; font-weight: 800; color: #fff; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .token-legend { display: flex; flex-direction: column; gap: .9rem; }
+    .tl-item {
+      display: flex; align-items: center; gap: .9rem;
+      padding: 1rem 1.2rem; background: rgba(7,18,43,.55);
+      border: 1px solid rgba(56,217,255,.08); border-radius: 12px;
+      transition: border-color .25s, transform .25s, background .25s;
+    }
+    .tl-item:hover { border-color: rgba(56,217,255,.3); transform: translateX(4px); background: rgba(10,24,56,.7); }
+    .tl-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+    .tl-text { flex: 1; }
+    .tl-name { font-size: .85rem; font-weight: 700; color: #fff; }
+    .tl-desc { font-size: .72rem; color: rgba(226,234,255,.42); margin-top: 2px; }
+    .tl-pct { font-size: 1rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: ROADMAP
+       ───────────────────────────────────────────────────────── */
+    #roadmap { background: linear-gradient(180deg, rgba(5,13,31,.85) 0%, rgba(7,18,43,.4) 100%); }
+    .rm-header { text-align: center; margin-bottom: 4rem; }
+    .rm-header .sec-label { justify-content: center; }
+    .rm-timeline { position: relative; max-width: 920px; margin: 0 auto; }
+    .rm-timeline::before {
+      content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(180deg, transparent, rgba(56,217,255,.35), rgba(56,217,255,.35), transparent);
+      transform: translateX(-50%);
+    }
+    @media(max-width:768px){ .rm-timeline::before { left: 22px; } }
+    .rm-row {
+      position: relative; display: grid; grid-template-columns: 1fr 60px 1fr; gap: 1rem; align-items: center; margin-bottom: 2.5rem;
+    }
+    @media(max-width:768px){ .rm-row { grid-template-columns: 44px 1fr; } }
+    .rm-card {
+      padding: 1.4rem 1.6rem; background: rgba(10,24,56,.55);
+      border: 1px solid rgba(56,217,255,.1); border-radius: 14px;
+      transition: border-color .3s, transform .3s, box-shadow .3s;
+    }
+    .rm-card:hover { border-color: rgba(56,217,255,.32); transform: translateY(-3px); box-shadow: 0 14px 40px rgba(56,217,255,.08); }
+    .rm-row.left .rm-card { grid-column: 1; text-align: right; }
+    .rm-row.right .rm-card { grid-column: 3; text-align: left; }
+    @media(max-width:768px){
+      .rm-row.left .rm-card, .rm-row.right .rm-card { grid-column: 2; text-align: left; }
+    }
+    .rm-q { font-size: .68rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: var(--cyan); margin-bottom: .5rem; }
+    .rm-title { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: .55rem; }
+    .rm-desc  { font-size: .82rem; color: rgba(226,234,255,.5); line-height: 1.65; }
+    .rm-tag {
+      display: inline-block; margin-top: .8rem; padding: 3px 10px;
+      font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      border-radius: 99px;
+    }
+    .rm-tag.done { background: rgba(34,232,122,.12); color: #22e87a; border: 1px solid rgba(34,232,122,.3); }
+    .rm-tag.now  { background: rgba(56,217,255,.12); color: var(--cyan); border: 1px solid rgba(56,217,255,.3); }
+    .rm-tag.next { background: rgba(255,255,255,.05); color: rgba(255,255,255,.45); border: 1px solid rgba(255,255,255,.12); }
+    .rm-node {
+      grid-column: 2; width: 44px; height: 44px; border-radius: 50%;
+      background: var(--deep); border: 2px solid var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--cyan); font-weight: 900; font-size: .82rem;
+      position: relative; z-index: 2; margin: 0 auto;
+      box-shadow: 0 0 0 6px rgba(5,13,31,1), 0 0 22px rgba(56,217,255,.45);
+    }
+    .rm-node.done { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #fff; border-color: transparent; }
+    @media(max-width:768px){ .rm-node { grid-column: 1; margin: 0; } }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: TESTIMONIALS
+       ───────────────────────────────────────────────────────── */
+    #testimonials { background: linear-gradient(180deg, rgba(7,18,43,.4) 0%, rgba(5,13,31,.7) 100%); }
+    .ts-header { text-align: center; margin-bottom: 3.5rem; }
+    .ts-header .sec-label { justify-content: center; }
+    .ts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
+    @media(max-width:900px){ .ts-grid{grid-template-columns:1fr 1fr} }
+    @media(max-width:600px){ .ts-grid{grid-template-columns:1fr} }
+    .ts-card {
+      padding: 1.8rem; background: linear-gradient(155deg, rgba(10,24,56,.7), rgba(7,18,43,.45));
+      border: 1px solid rgba(56,217,255,.1); border-radius: 16px;
+      position: relative; transition: border-color .3s, transform .3s, box-shadow .3s;
+    }
+    .ts-card:hover { border-color: rgba(56,217,255,.3); transform: translateY(-4px); box-shadow: 0 18px 50px rgba(56,217,255,.08); }
+    .ts-quote-mark {
+      position: absolute; top: 1rem; right: 1.2rem; font-size: 3.6rem; font-family: Georgia, serif;
+      color: rgba(56,217,255,.18); line-height: 1; pointer-events: none;
+    }
+    .ts-stars { display: flex; gap: 2px; margin-bottom: .9rem; }
+    .ts-star { color: #ffc857; font-size: .9rem; }
+    .ts-text { font-size: .9rem; line-height: 1.65; color: rgba(226,234,255,.78); margin-bottom: 1.4rem; position: relative; z-index: 1; }
+    .ts-author { display: flex; align-items: center; gap: .8rem; }
+    .ts-avatar {
+      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 800; color: #fff;
+      border: 1.5px solid rgba(56,217,255,.3);
+    }
+    .ts-meta-name { font-size: .85rem; font-weight: 700; color: #fff; }
+    .ts-meta-role { font-size: .72rem; color: rgba(226,234,255,.42); margin-top: 1px; }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: FAQ
+       ───────────────────────────────────────────────────────── */
+    #faq { background: linear-gradient(180deg, rgba(5,13,31,.7) 0%, rgba(7,18,43,.45) 100%); }
+    .faq-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; align-items: flex-start; }
+    @media(max-width:880px){ .faq-grid{grid-template-columns:1fr;gap:2.5rem} }
+    .faq-list { display: flex; flex-direction: column; gap: .8rem; }
+    .faq-item {
+      background: rgba(10,24,56,.5); border: 1px solid rgba(56,217,255,.09);
+      border-radius: 12px; overflow: hidden; transition: border-color .3s, background .3s;
+    }
+    .faq-item:hover { border-color: rgba(56,217,255,.22); }
+    .faq-item.open { border-color: rgba(56,217,255,.35); background: rgba(10,24,56,.7); }
+    .faq-q {
+      width: 100%; text-align: left; padding: 1.1rem 1.4rem;
+      background: none; border: none; cursor: pointer; color: #fff;
+      font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      transition: color .2s;
+    }
+    .faq-q:hover { color: var(--cyan); }
+    .faq-icon {
+      width: 22px; height: 22px; flex-shrink: 0; position: relative;
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    .faq-icon::before, .faq-icon::after {
+      content: ''; position: absolute; top: 50%; left: 50%; background: var(--cyan); border-radius: 1px;
+      transform: translate(-50%,-50%);
+    }
+    .faq-icon::before { width: 12px; height: 2px; }
+    .faq-icon::after  { width: 2px; height: 12px; transition: transform .35s; }
+    .faq-item.open .faq-icon::after { transform: translate(-50%,-50%) scaleY(0); }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .4s cubic-bezier(.4,0,.2,1);
+    }
+    .faq-a-inner {
+      padding: 0 1.4rem 1.3rem;
+      font-size: .85rem; line-height: 1.7; color: rgba(226,234,255,.55);
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       NEW: 3D TILT (applied via JS)
+       ───────────────────────────────────────────────────────── */
+    .tilt { transform-style: preserve-3d; transition: transform .15s ease-out; will-change: transform; }
+    .tilt-inner { transform: translateZ(20px); }
+
+    /* ─────────────────────────────────────────────────────────
+       Misc polish
+       ───────────────────────────────────────────────────────── */
+    .nav-logo-img { transition: transform .4s, filter .35s; }
+    .nav-logo:hover .nav-logo-img { transform: rotate(-6deg) scale(1.06); filter: drop-shadow(0 0 14px rgba(56,217,255,.45)); }
+    .stat-val { transition: transform .3s; display: inline-block; }
+    .stats-band:hover .stat-val { transform: translateY(-2px); }
+    /* Gradient text shimmer for hero title */
+    .hero-title .gx { background-size: 200% auto; animation: gxShine 6s linear infinite; }
+    @keyframes gxShine { to { background-position: -200% center; } }
+    .word-cycle {
+      display: inline-block;
+      min-width: 9ch;
+      text-align: left;
+      transition: opacity .25s ease;
+    }
+
+    /* ── SCROLL PROGRESS ── */
+    #scrollProgress {
+      position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+      z-index: 10001;
+      background: linear-gradient(90deg, var(--blue), var(--cyan), #a78bfa);
+      box-shadow: 0 0 16px rgba(56,217,255,.55);
+      pointer-events: none;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* ── FILM GRAIN ── */
+    #grain {
+      position: fixed; inset: 0; z-index: 9998; pointer-events: none; opacity: .055;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    /* ── HERO MESH CANVAS ── */
+    .mesh-canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      z-index: 1; pointer-events: none; opacity: .85;
+    }
+
+    /* ── HERO FLOATING GLASS STATS ── */
+    .hero-floats {
+      position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    }
+    .hf-card {
+      position: absolute; pointer-events: auto;
+      padding: 1rem 1.2rem; min-width: 170px;
+      background: linear-gradient(135deg, rgba(10,24,56,.72), rgba(5,13,31,.55));
+      border: 1px solid rgba(56,217,255,.22);
+      border-radius: 14px;
+      backdrop-filter: blur(18px) saturate(1.4);
+      box-shadow: 0 16px 48px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04) inset;
+      animation: hfBob 7s ease-in-out infinite;
+    }
+    .hf-card .hf-k { font-size: .62rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: rgba(226,234,255,.45); margin-bottom: 6px; }
+    .hf-card .hf-v { font-family: var(--font-display); font-size: 1.35rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+    .hf-card .hf-s { font-size: .72rem; color: #22e87a; font-weight: 700; margin-top: 4px; }
+    .hf-a { top: 18%; left: 5%; animation-delay: 0s; }
+    .hf-b { bottom: 22%; right: 6%; animation-delay: -2s; }
+    .hf-c { top: 42%; right: 7%; animation-delay: -4s; min-width: 200px; }
+    @keyframes hfBob { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-10px); } }
+    @media(max-width:1180px){ .hero-floats { display: none; } }
+
+    /* ── SECTION DOT NAV ── */
+    #sectionDots {
+      position: fixed; right: 1.1rem; top: 50%; transform: translateY(-50%);
+      z-index: 95; display: flex; flex-direction: column; gap: 10px;
+    }
+    #sectionDots a {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: rgba(255,255,255,.18); border: 1px solid rgba(56,217,255,.25);
+      transition: transform .25s, background .25s, box-shadow .25s;
+    }
+    #sectionDots a:hover { background: rgba(56,217,255,.45); transform: scale(1.25); }
+    #sectionDots a.active {
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(56,217,255,.5);
+    }
+    #sectionDots a span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+    @media(max-width:1024px){ #sectionDots { display: none; } }
+
+    /* ── BENTO GRID ── */
+    #stack { background: linear-gradient(180deg, var(--deep) 0%, rgba(7,18,43,.55) 100%); }
+    .bento-header { text-align: center; margin-bottom: 3rem; }
+    .bento-header .sec-label { justify-content: center; }
+    .bento-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+    }
+    @media(max-width:900px){ .bento-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:520px){ .bento-grid { grid-template-columns: 1fr; } }
+    .bento-item {
+      padding: 1.5rem 1.45rem; border-radius: 18px;
+      background: linear-gradient(155deg, rgba(10,24,56,.65), rgba(7,18,43,.4));
+      border: 1px solid rgba(56,217,255,.1);
+      transition: border-color .35s, transform .35s, box-shadow .35s;
+      position: relative; overflow: hidden;
+    }
+    .bento-item::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56,217,255,.5), transparent);
+      opacity: 0; transition: opacity .35s;
+    }
+    .bento-item:hover { border-color: rgba(56,217,255,.35); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(56,217,255,.1); }
+    .bento-item:hover::before { opacity: 1; }
+    .bento-item.span-2 { grid-column: span 2; }
+    @media(max-width:900px){
+      .bento-item.span-2 { grid-column: span 2; }
+    }
+    @media(max-width:520px){
+      .bento-item.span-2 { grid-column: span 1; }
+    }
+    .bi-icon {
+      width: 40px; height: 40px; border-radius: 11px; margin-bottom: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(26,111,255,.35), rgba(56,217,255,.15));
+      border: 1px solid rgba(56,217,255,.2);
+    }
+    .bi-icon svg { width: 20px; height: 20px; }
+    .bi-t { font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: .5rem; letter-spacing: -.02em; }
+    .bi-d { font-size: .82rem; color: rgba(226,234,255,.48); line-height: 1.65; }
+    .bi-tag {
+      display: inline-block; margin-top: .9rem; padding: 3px 10px;
+      font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+      border-radius: 99px; background: rgba(56,217,255,.1); color: var(--cyan); border: 1px solid rgba(56,217,255,.22);
+    }
+
+    /* ── FOOTER NEWSLETTER ── */
+    .ft-news {
+      padding: 2.2rem 2rem; margin-bottom: 2rem;
+      background: linear-gradient(135deg, rgba(10,24,56,.55), rgba(7,18,43,.35));
+      border: 1px solid rgba(56,217,255,.12); border-radius: 16px;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;
+    }
+    .ft-news h4 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: .35rem; }
+    .ft-news p { font-size: .82rem; color: rgba(226,234,255,.45); max-width: 360px; line-height: 1.6; }
+    .ft-news-right { flex: 1; min-width: 240px; max-width: 420px; }
+    .ft-news-form { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .ft-news-form input {
+      min-width: 220px; padding: .75rem 1rem; border-radius: 10px;
+      border: 1px solid rgba(56,217,255,.2); background: rgba(5,13,31,.75);
+      color: #fff; font-family: var(--font-body); font-size: .85rem; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .ft-news-form input:focus { border-color: rgba(56,217,255,.45); box-shadow: 0 0 0 3px rgba(56,217,255,.08); }
+    .ft-news-form input::placeholder { color: rgba(226,234,255,.25); }
+    .ft-news-form button {
+      padding: .75rem 1.35rem; border-radius: 10px; border: none; cursor: pointer;
+      font-family: var(--font-body); font-size: .8rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #fff;
+      transition: transform .2s, box-shadow .2s, opacity .2s;
+    }
+    .ft-news-form button:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(56,217,255,.3); }
+    #ftNewsToast {
+      display: none; margin-top: .75rem; font-size: .78rem; font-weight: 600; color: #22e87a;
+    }
+    #ftNewsToast.show { display: block; }
+
+    /* ── REDUCED MOTION ── */
+    html.reduce-motion .ticker-track,
+    html.reduce-motion .backers-track { animation: none !important; }
+    html.reduce-motion .mesh-canvas { display: none !important; }
+    html.reduce-motion #grain { opacity: 0 !important; }
+    html.reduce-motion .cursor-glow { display: none !important; }
+    html.reduce-motion .hf-card { animation: none !important; }
+    html.reduce-motion .hero-title .gx { animation: none !important; }
+    html.reduce-motion .particle { animation: none !important; opacity: 0 !important; }
+    html.reduce-motion .aur-orb { animation: none !important; }
+  </style>
+</head>
+<body>
+
+<div id="scrollProgress" aria-hidden="true"></div>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <img class="pl-logo nav-logo-img" src="arc-light-logo.png" width="72" height="72" alt="" decoding="async" />
+  <div class="pl-bar"></div>
+  <div class="pl-text">Initializing the Network</div>
+</div>
+
+<!-- CURSOR GLOW -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<div id="grain" aria-hidden="true"></div>
+
+<nav id="sectionDots" aria-label="Jump to section">
+  <a href="#hero" class="active" title="Home"><span>Home</span></a>
+  <a href="#stack" title="The stack"><span>The stack</span></a>
+  <a href="#solutions" title="Solutions"><span>Solutions</span></a>
+  <a href="#live" title="Live network"><span>Live network</span></a>
+  <a href="#token" title="Token"><span>Token</span></a>
+  <a href="#roadmap" title="Roadmap"><span>Roadmap</span></a>
+  <a href="#testimonials" title="Testimonials"><span>Testimonials</span></a>
+  <a href="#careers" title="Careers"><span>Careers</span></a>
+</nav>
+
+<!-- NAVBAR -->
+<nav id="nav">
+  <a class="nav-logo" href="#hero">
+    <img class="nav-logo-img" src="arc-light-logo.png" width="48" height="48" alt="" decoding="async" />
+    <span class="nav-logo-text">Arc Light Labs</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#solutions">Solutions</a></li>
+    <li><a href="#token">Token</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#technology">Technology</a></li>
+    <li><a href="#careers">Careers</a></li>
+    <li><a href="https://discord.gg/rcKfHMF8" target="_blank" rel="noopener" style="color:rgba(255,255,255,.75)!important;background:rgba(88,101,242,.18)!important;border:1px solid rgba(88,101,242,.35)!important;border-radius:99px;">
+      <svg width="13" height="13" viewBox="0 0 127.14 96.36" fill="currentColor" style="-webkit-text-fill-color:unset"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+      Discord
+    </a></li>
+    <li><a href="#careers" class="nav-cta">Apply Now</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <canvas class="mesh-canvas" id="meshCanvas" aria-hidden="true"></canvas>
+  <div class="aurora">
+    <div class="aur-orb a"></div>
+    <div class="aur-orb b"></div>
+    <div class="aur-orb c"></div>
+  </div>
+  <div class="hero-grid"></div>
+  <div class="particles" id="pts"></div>
+
+  <svg class="hero-arcs" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;pointer-events:none;">
+    <defs>
+      <linearGradient id="ag1" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#1a6fff" stop-opacity="0"/>
+        <stop offset="45%" stop-color="#38d9ff" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
+      </linearGradient>
+      <linearGradient id="ag2" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#1a6fff" stop-opacity="0"/>
+        <stop offset="55%" stop-color="#38d9ff" stop-opacity=".5"/>
+        <stop offset="100%" stop-color="#38d9ff" stop-opacity=".85"/>
+      </linearGradient>
+      <filter id="af"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <path class="as"      d="M110 830 Q290 710 495 565 Q648 442 852 328 Q984 258 1065 198" stroke="url(#ag1)" stroke-width="4"   fill="none" stroke-linecap="round" filter="url(#af)"/>
+    <path class="as as2"  d="M90 848 Q275 722 482 578 Q636 455 845 342 Q978 272 1058 212" stroke="url(#ag2)" stroke-width="2.5" fill="none" stroke-linecap="round" filter="url(#af)" style="stroke-dasharray:2000;stroke-dashoffset:2000;"/>
+    <path class="as as3"  d="M132 812 Q308 690 510 548 Q658 428 862 314 Q990 244 1072 184" stroke="#7ee8ff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".42" style="stroke-dasharray:2000;stroke-dashoffset:2000;"/>
+    <path class="as as4"  d="M75 866 Q262 734 470 590 Q626 464 838 358 Q972 288 1052 228" stroke="#1a6fff" stroke-width="2"   fill="none" stroke-linecap="round" opacity=".38" style="stroke-dasharray:2000;stroke-dashoffset:2000;"/>
+    <path class="as as5"  d="M155 795 Q325 672 525 532 Q668 412 870 298 Q996 228 1080 168" stroke="url(#ag1)" stroke-width="1" fill="none" stroke-linecap="round" opacity=".28" style="stroke-dasharray:2000;stroke-dashoffset:2000;"/>
+  </svg>
+
+  <div class="starburst" style="top:20%;right:24%;">
+    <div class="starburst-core"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge"><span class="badge-dot"></span>Now in Open Beta · Join the Revolution</div>
+    <h1 class="hero-title">Speed of Light.<br><span class="gx">Power of <span class="word-cycle" id="wordCycle">Tomorrow.</span></span></h1>
+    <p class="hero-sub">Arc Light Labs is building the infrastructure layer for the next generation of decentralized applications — blazing fast, infinitely scalable, and radically open.</p>
+    <div class="hero-actions">
+      <a href="#solutions" class="btn-primary">Explore the Platform <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="#careers" class="btn-ghost">Join Our Team <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></a>
+    </div>
+  </div>
+
+  <div class="hero-floats" aria-hidden="true">
+    <div class="hf-card hf-a">
+      <div class="hf-k">Network TPS</div>
+      <div class="hf-v" id="hfTps">100K+</div>
+      <div class="hf-s">↑ live stress-test</div>
+    </div>
+    <div class="hf-card hf-b">
+      <div class="hf-k">Finality</div>
+      <div class="hf-v">&lt;50ms</div>
+      <div class="hf-s">p99 confirmed</div>
+    </div>
+    <div class="hf-card hf-c">
+      <div class="hf-k">Active builders</div>
+      <div class="hf-v">14,200+</div>
+      <div class="hf-s">+312 this week</div>
+    </div>
+  </div>
+
+  <div class="scroll-ind">
+    <div class="scroll-mouse"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-band fade-up">
+  <div class="stats-inner">
+    <div><span class="stat-val" data-count="50" data-suffix="ms">0ms</span><span class="stat-lbl">Avg. Finality</span></div>
+    <div><span class="stat-val" data-count="100" data-suffix="K+">0K+</span><span class="stat-lbl">TPS Capacity</span></div>
+    <div><span class="stat-val" data-count="99.99" data-suffix="%" data-decimals="2">0%</span><span class="stat-lbl">Uptime SLA</span></div>
+    <div><span class="stat-val" data-count="0.0001" data-prefix="$" data-decimals="4">$0</span><span class="stat-lbl">Avg. Tx Cost</span></div>
+    <div><span class="stat-val" data-count="180" data-suffix="+">0+</span><span class="stat-lbl">Global Nodes</span></div>
+  </div>
+</div>
+
+<!-- LIVE PRICE TICKER -->
+<div class="ticker-band">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- BACKERS / PARTNERS -->
+<div class="backers">
+  <div class="backers-label">Backed by world-class investors & ecosystem partners</div>
+  <div class="backers-mask">
+    <div class="backers-track" id="backersTrack"></div>
+  </div>
+</div>
+
+<!-- BENTO / STACK -->
+<section id="stack">
+  <div class="si">
+    <div class="bento-header fade-up">
+      <div class="sec-label">The Stack</div>
+      <h2 class="sec-title">Everything you need. Nothing you don’t.</h2>
+      <p class="sec-desc" style="max-width:560px;margin:0 auto;">RPC, indexer, bridge, and observability — one coherent platform so your team ships instead of wiring infra.</p>
+    </div>
+    <div class="bento-grid">
+      <div class="bento-item span-2 fade-up">
+        <div class="bi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div class="bi-t">Unified RPC + WebSocket layer</div>
+        <div class="bi-d">Global edge endpoints with automatic failover, JSON-RPC and gRPC, plus subscription streams tuned for real-time apps. One URL for prod and testnet.</div>
+        <span class="bi-tag">Latency-optimized</span>
+      </div>
+      <div class="bento-item fade-up" style="transition-delay:.06s">
+        <div class="bi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        <div class="bi-t">Arc Bridge</div>
+        <div class="bi-d">Trustless transfers across 20+ chains with cryptographic proofs, not wrapped trust.</div>
+        <span class="bi-tag">Native interop</span>
+      </div>
+      <div class="bento-item fade-up" style="transition-delay:.12s">
+        <div class="bi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+        <div class="bi-t">Indexer + GraphQL</div>
+        <div class="bi-d">Pre-synced datasets, decoded events, and subgraph-compatible queries out of the box.</div>
+        <span class="bi-tag">Ship faster</span>
+      </div>
+      <div class="bento-item fade-up" style="transition-delay:.04s">
+        <div class="bi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="bi-t">Security you can prove</div>
+        <div class="bi-d">Formal verification on consensus paths, audited execution, and a live bug bounty.</div>
+        <span class="bi-tag">Enterprise-ready</span>
+      </div>
+      <div class="bento-item span-2 fade-up" style="transition-delay:.18s">
+        <div class="bi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+        <div class="bi-t">Real-time observability</div>
+        <div class="bi-d">Dashboards for block production, mempool health, and per-app gas — export to Datadog or Grafana in one click.</div>
+        <span class="bi-tag">Ops-grade</span>
+      </div>
+      <div class="bento-item fade-up" style="transition-delay:.24s">
+        <div class="bi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <div class="bi-t">CLI &amp; local devnet</div>
+        <div class="bi-d">Spin up a deterministic chain in seconds. Same bytecode path from laptop to mainnet.</div>
+        <span class="bi-tag">DX-first</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTIONS -->
+<section id="solutions">
+  <div class="si">
+    <div class="sol-header fade-up">
+      <div class="sec-label">Solutions</div>
+      <h2 class="sec-title">Built for every frontier.</h2>
+      <p class="sec-desc" style="max-width:520px;margin:0 auto;">From DeFi to gaming to consumer apps — Arc Light gives every category the infrastructure it deserves.</p>
+    </div>
+    <div class="sol-grid">
+
+      <div class="sol-card fade-up" style="transition-delay:.05s">
+        <div class="sol-img-wrap">
+          <div class="sol-img" style="background:linear-gradient(135deg,#ff6b35 0%,#f7931e 35%,#00c9a7 70%,#0093e9 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+            <svg viewBox="0 0 300 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+              <defs>
+                <filter id="gf1"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <!-- Floating torus rings -->
+              <ellipse cx="110" cy="105" rx="52" ry="20" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="18" filter="url(#gf1)"/>
+              <ellipse cx="110" cy="105" rx="52" ry="20" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="6"/>
+              <ellipse cx="155" cy="118" rx="44" ry="17" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="14" filter="url(#gf1)" transform="rotate(-15,155,118)"/>
+              <ellipse cx="155" cy="118" rx="44" ry="17" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="5" transform="rotate(-15,155,118)"/>
+              <ellipse cx="195" cy="95" rx="36" ry="14" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="10" filter="url(#gf1)" transform="rotate(-25,195,95)"/>
+              <ellipse cx="195" cy="95" rx="36" ry="14" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="4" transform="rotate(-25,195,95)"/>
+              <!-- Chart bars -->
+              <rect x="20" y="130" width="14" height="50" rx="3" fill="rgba(255,255,255,0.3)"/>
+              <rect x="38" y="110" width="14" height="70" rx="3" fill="rgba(255,255,255,0.45)"/>
+              <rect x="56" y="90"  width="14" height="90" rx="3" fill="rgba(255,255,255,0.6)"/>
+              <!-- Grid lines -->
+              <line x1="0" y1="50"  x2="300" y2="50"  stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <line x1="0" y1="100" x2="300" y2="100" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <line x1="0" y1="150" x2="300" y2="150" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="sol-img-overlay"></div>
+        </div>
+        <div class="sol-body">
+          <h3>Where Finance Moves Onchain, at Scale</h3>
+          <p>Arc Light is your enterprise-grade infrastructure for global finance. See how sub-50ms finality, world-class tooling, and Ethereum-grade security can drive impact for your protocol.</p>
+          <a href="#benefits" class="sol-link">Learn about Arc DeFi <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+      <div class="sol-card fade-up" style="transition-delay:.12s">
+        <div class="sol-img-wrap">
+          <div class="sol-img" style="background:linear-gradient(135deg,#0f2027 0%,#203a43 45%,#2c5364 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+            <svg viewBox="0 0 300 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+              <defs>
+                <filter id="gf2"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <linearGradient id="phoneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#00f2fe"/>
+                  <stop offset="100%" stop-color="#4facfe"/>
+                </linearGradient>
+              </defs>
+              <!-- Glow blob -->
+              <ellipse cx="150" cy="100" rx="80" ry="60" fill="rgba(0,200,255,0.12)" filter="url(#gf2)"/>
+              <!-- Phone body -->
+              <rect x="112" y="30" width="76" height="140" rx="12" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+              <!-- Screen glow -->
+              <rect x="118" y="46" width="64" height="100" rx="6" fill="url(#phoneGrad)" opacity="0.85" filter="url(#gf2)"/>
+              <rect x="118" y="46" width="64" height="100" rx="6" fill="rgba(255,255,255,0.08)"/>
+              <!-- Screen content lines -->
+              <rect x="126" y="58"  width="40" height="4" rx="2" fill="rgba(255,255,255,0.7)"/>
+              <rect x="126" y="68"  width="30" height="3" rx="1.5" fill="rgba(255,255,255,0.4)"/>
+              <rect x="126" y="80"  width="48" height="8" rx="4" fill="rgba(255,255,255,0.2)"/>
+              <rect x="126" y="94"  width="48" height="8" rx="4" fill="rgba(255,255,255,0.2)"/>
+              <rect x="126" y="108" width="32" height="8" rx="4" fill="rgba(0,200,255,0.5)"/>
+              <!-- Home indicator -->
+              <rect x="137" y="155" width="26" height="3" rx="1.5" fill="rgba(255,255,255,0.4)"/>
+              <!-- Floating nodes -->
+              <circle cx="60"  cy="60"  r="6" fill="rgba(0,200,255,0.6)" filter="url(#gf2)"/>
+              <circle cx="240" cy="80"  r="5" fill="rgba(79,172,254,0.6)" filter="url(#gf2)"/>
+              <circle cx="55"  cy="140" r="4" fill="rgba(0,200,255,0.4)"/>
+              <circle cx="245" cy="140" r="4" fill="rgba(79,172,254,0.4)"/>
+              <line x1="66" y1="60" x2="112" y2="80" stroke="rgba(0,200,255,0.25)" stroke-width="1" stroke-dasharray="4 3"/>
+              <line x1="234" y1="80" x2="188" y2="80" stroke="rgba(79,172,254,0.25)" stroke-width="1" stroke-dasharray="4 3"/>
+            </svg>
+          </div>
+          <div class="sol-img-overlay"></div>
+        </div>
+        <div class="sol-body">
+          <h3>Where Big Ideas Meet Mass Adoption</h3>
+          <p>Building a consumer app that millions will love requires a network that feels invisible. Arc Light provides near-instant speed, micro-cent costs, and the scale to make your onchain experience feel like the best Web2 apps.</p>
+          <a href="#benefits" class="sol-link">Learn about Arc Consumer <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+      <div class="sol-card fade-up" style="transition-delay:.2s">
+        <div class="sol-img-wrap">
+          <div class="sol-img" style="background:linear-gradient(135deg,#0a3d0a 0%,#1a6b1a 35%,#00c840 65%,#7fff00 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+            <svg viewBox="0 0 300 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+              <defs>
+                <filter id="gf3"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <!-- Glow -->
+              <ellipse cx="150" cy="100" rx="90" ry="55" fill="rgba(0,255,80,0.1)" filter="url(#gf3)"/>
+              <!-- Controller body -->
+              <rect x="72" y="72" width="156" height="76" rx="36" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.5)" stroke-width="2.5"/>
+              <!-- Grips -->
+              <ellipse cx="100" cy="148" rx="22" ry="16" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+              <ellipse cx="200" cy="148" rx="22" ry="16" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+              <!-- D-pad -->
+              <rect x="98" y="96"  width="10" height="28" rx="3" fill="rgba(255,255,255,0.6)"/>
+              <rect x="90" y="104" width="26" height="10" rx="3" fill="rgba(255,255,255,0.6)"/>
+              <!-- Buttons -->
+              <circle cx="185" cy="95"  r="7" fill="rgba(255,100,100,0.8)"/>
+              <circle cx="200" cy="108" r="7" fill="rgba(100,200,255,0.8)"/>
+              <circle cx="170" cy="108" r="7" fill="rgba(255,230,0,0.8)"/>
+              <circle cx="185" cy="121" r="7" fill="rgba(100,255,150,0.8)"/>
+              <!-- Center buttons -->
+              <rect x="132" y="100" width="14" height="8" rx="4" fill="rgba(255,255,255,0.35)"/>
+              <rect x="152" y="100" width="14" height="8" rx="4" fill="rgba(255,255,255,0.35)"/>
+              <!-- Stars -->
+              <circle cx="40"  cy="40"  r="2" fill="rgba(255,255,255,0.7)"/>
+              <circle cx="260" cy="35"  r="2.5" fill="rgba(100,255,150,0.8)"/>
+              <circle cx="270" cy="160" r="1.5" fill="rgba(255,255,255,0.5)"/>
+              <circle cx="30"  cy="165" r="2" fill="rgba(100,255,150,0.6)"/>
+            </svg>
+          </div>
+          <div class="sol-img-overlay"></div>
+        </div>
+        <div class="sol-body">
+          <h3>Build Games Without Limits</h3>
+          <p>Arc Light enables you to create the games you've always dreamed of — with near-instant transaction speeds, seamless asset ownership, and a frictionless experience your players will never want to leave.</p>
+          <a href="#benefits" class="sol-link">Learn about Arc Gaming <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section id="benefits">
+  <div class="si">
+    <div class="ben-header fade-up">
+      <div class="sec-label">Why Arc Light</div>
+      <h2 class="sec-title">Built for builders.<br>Designed for scale.</h2>
+      <p class="sec-desc" style="max-width:500px;margin:0 auto;">Everything you need to ship production-grade applications on the fastest infrastructure layer in existence.</p>
+    </div>
+    <div class="ben-grid">
+
+      <div class="ben-card fade-up" style="transition-delay:.04s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="ben-title">Instant Finality</div>
+        <div class="ben-desc">Transactions confirm in under 50ms. No waiting. No uncertainty. Your users get the responsiveness they expect from native apps — on decentralized infrastructure.</div>
+      </div>
+
+      <div class="ben-card fade-up" style="transition-delay:.08s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="ben-title">Enterprise-Grade Security</div>
+        <div class="ben-desc">Multi-layered cryptographic security with formal verification and a $10M bug bounty. Your protocol is protected from day one, battle-tested under real conditions.</div>
+      </div>
+
+      <div class="ben-card fade-up" style="transition-delay:.12s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        </div>
+        <div class="ben-title">Horizontal Scalability</div>
+        <div class="ben-desc">Arc Light scales with your demand — automatically. Our sharded execution environment handles 100,000+ TPS without degradation, no matter how much traffic you send.</div>
+      </div>
+
+      <div class="ben-card fade-up" style="transition-delay:.16s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="ben-title">EVM Compatible</div>
+        <div class="ben-desc">Deploy your existing Solidity contracts without modification. Arc Light is fully EVM-equivalent — migrate your entire dapp stack in hours, not months.</div>
+      </div>
+
+      <div class="ben-card fade-up" style="transition-delay:.2s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="ben-title">Near-Zero Gas Costs</div>
+        <div class="ben-desc">Transaction fees as low as $0.0001. Micro-transactions, high-frequency interactions, and gas-intensive computations are finally economically viable for everyone.</div>
+      </div>
+
+      <div class="ben-card fade-up" style="transition-delay:.24s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <div class="ben-title">Developer First</div>
+        <div class="ben-desc">SDKs in TypeScript, Python, Rust, and Go. A best-in-class CLI, local devnet, full-featured testnet, and 24/7 developer support from our core engineering team.</div>
+      </div>
+
+      <div class="ben-card fade-up" style="transition-delay:.28s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <div class="ben-title">Native Cross-Chain</div>
+        <div class="ben-desc">Our Arc Bridge supports trustless, permissionless asset transfers between 20+ chains. Build interoperable protocols without relying on third-party bridge infrastructure.</div>
+      </div>
+
+      <div class="ben-card fade-up" style="transition-delay:.32s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="ben-title">Deep Analytics</div>
+        <div class="ben-desc">Real-time dashboards, on-chain data indexing, and a GraphQL API layer built in. Get the observability you need to run your protocol like a professional product.</div>
+      </div>
+
+      <div class="ben-card fade-up" style="transition-delay:.36s">
+        <div class="ben-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M12 4v12M4.93 7.93 12 4l7.07 3.93"/><circle cx="12" cy="4" r="1.5" fill="#38d9ff"/></svg>
+        </div>
+        <div class="ben-title">Carbon Neutral</div>
+        <div class="ben-desc">Proof-of-Stake consensus means Arc Light uses 99.9% less energy than Proof-of-Work networks. We offset the remainder through verified carbon credits, automatically.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="si">
+    <div class="how-header fade-up">
+      <div class="sec-label">Process</div>
+      <h2 class="sec-title">From zero to live in four steps.</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-step fade-up" style="transition-delay:.04s">
+        <div class="how-num">01</div>
+        <div class="how-title">Connect</div>
+        <div class="how-desc">Point your existing tools at the Arc Light RPC endpoint. No new wallet required — MetaMask, WalletConnect, or any EVM-compatible signer works out of the box.</div>
+      </div>
+      <div class="how-step fade-up" style="transition-delay:.1s">
+        <div class="how-num">02</div>
+        <div class="how-title">Deploy</div>
+        <div class="how-desc">Push your contracts using Hardhat, Foundry, or Remix. Our testnet mirrors mainnet exactly — what works in dev ships perfectly to production.</div>
+      </div>
+      <div class="how-step fade-up" style="transition-delay:.16s">
+        <div class="how-num">03</div>
+        <div class="how-title">Integrate</div>
+        <div class="how-desc">Pull in our SDK, set up event listeners, and connect to the data indexer. Full stack integration takes hours, not sprints.</div>
+      </div>
+      <div class="how-step fade-up" style="transition-delay:.22s">
+        <div class="how-num">04</div>
+        <div class="how-title">Scale</div>
+        <div class="how-desc">Ship to users. Arc Light handles the traffic automatically. Your protocol stays fast and cheap whether you have 100 or 10 million users.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNOLOGY -->
+<section id="technology">
+  <div class="si">
+    <div class="tech-grid">
+      <div class="fade-up">
+        <div class="sec-label">Under the Hood</div>
+        <h2 class="sec-title">Cutting-edge tech at every layer.</h2>
+        <p class="sec-desc">Arc Light isn't just fast software on the same old architecture. We rebuilt the stack from scratch.</p>
+        <div class="tech-list">
+
+          <div class="tech-item">
+            <div class="tech-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+              <h4>Arc Consensus</h4>
+              <p>Our novel BFT variant with pipelined execution — 2/3 stake for finality, zero forks, sub-second confirmation guaranteed.</p>
+            </div>
+          </div>
+
+          <div class="tech-item">
+            <div class="tech-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <div>
+              <h4>Parallel EVM</h4>
+              <p>Concurrent transaction execution with optimistic conflict resolution. Up to 16x throughput vs. sequential EVM implementations.</p>
+            </div>
+          </div>
+
+          <div class="tech-item">
+            <div class="tech-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="#38d9ff"/></svg>
+            </div>
+            <div>
+              <h4>ZK Data Availability</h4>
+              <p>State commitments posted with ZK validity proofs, giving cryptographic guarantees without running a full node.</p>
+            </div>
+          </div>
+
+          <div class="tech-item">
+            <div class="tech-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#38d9ff" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="4" cy="6" r="1.5" fill="#38d9ff"/><circle cx="4" cy="12" r="1.5" fill="#38d9ff"/><circle cx="4" cy="18" r="1.5" fill="#38d9ff"/></svg>
+            </div>
+            <div>
+              <h4>Dynamic Sharding</h4>
+              <p>Execution shards spin up automatically under load, then consolidate during quiet periods — you pay for exactly what you use.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tech-visual fade-up" style="transition-delay:.2s">
+        <div class="net-img-wrap">
+          <div class="net-img" style="background:linear-gradient(160deg,#050d1f 0%,#07183a 50%,#0a2560 100%);min-height:380px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+            <svg viewBox="0 0 420 380" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+              <defs>
+                <filter id="nf"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <linearGradient id="rackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0d2850"/>
+                  <stop offset="100%" stop-color="#0a1c3e"/>
+                </linearGradient>
+                <style>
+                  .led { animation: ledBlink 2s ease-in-out infinite; }
+                  .led:nth-child(2n) { animation-delay: .4s; }
+                  .led:nth-child(3n) { animation-delay: .8s; }
+                  .led:nth-child(4n) { animation-delay: 1.2s; }
+                  @keyframes ledBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
+                </style>
+              </defs>
+              <!-- Background glow -->
+              <ellipse cx="210" cy="190" rx="160" ry="120" fill="rgba(26,111,255,0.08)" filter="url(#nf)"/>
+              <!-- Grid -->
+              <line x1="0" y1="95"  x2="420" y2="95"  stroke="rgba(56,217,255,0.06)" stroke-width="1"/>
+              <line x1="0" y1="190" x2="420" y2="190" stroke="rgba(56,217,255,0.06)" stroke-width="1"/>
+              <line x1="0" y1="285" x2="420" y2="285" stroke="rgba(56,217,255,0.06)" stroke-width="1"/>
+              <line x1="105" y1="0" x2="105" y2="380" stroke="rgba(56,217,255,0.06)" stroke-width="1"/>
+              <line x1="210" y1="0" x2="210" y2="380" stroke="rgba(56,217,255,0.06)" stroke-width="1"/>
+              <line x1="315" y1="0" x2="315" y2="380" stroke="rgba(56,217,255,0.06)" stroke-width="1"/>
+              <!-- Server rack 1 -->
+              <rect x="60" y="60" width="120" height="260" rx="8" fill="url(#rackGrad)" stroke="rgba(56,217,255,0.2)" stroke-width="1.5"/>
+              <!-- Rack units -->
+              <rect x="68" y="72"  width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="96"  width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="120" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="144" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="168" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="192" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="216" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="240" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="264" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="68" y="288" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <!-- LEDs -->
+              <circle class="led" cx="78" cy="81"  r="3" fill="#22e87a"/>
+              <circle class="led" cx="78" cy="105" r="3" fill="#22e87a"/>
+              <circle class="led" cx="78" cy="129" r="3" fill="#38d9ff"/>
+              <circle class="led" cx="78" cy="153" r="3" fill="#22e87a"/>
+              <circle class="led" cx="78" cy="177" r="3" fill="#ff4444"/>
+              <circle class="led" cx="78" cy="201" r="3" fill="#22e87a"/>
+              <circle class="led" cx="78" cy="225" r="3" fill="#38d9ff"/>
+              <circle class="led" cx="78" cy="249" r="3" fill="#22e87a"/>
+              <circle class="led" cx="78" cy="273" r="3" fill="#22e87a"/>
+              <circle class="led" cx="78" cy="297" r="3" fill="#38d9ff"/>
+              <!-- Activity bars -->
+              <rect x="88" y="77"  width="72" height="8" rx="2" fill="rgba(56,217,255,0.15)"/>
+              <rect x="88" y="77"  width="58" height="8" rx="2" fill="rgba(56,217,255,0.5)"/>
+              <rect x="88" y="101" width="72" height="8" rx="2" fill="rgba(56,217,255,0.15)"/>
+              <rect x="88" y="101" width="44" height="8" rx="2" fill="rgba(56,217,255,0.5)"/>
+              <rect x="88" y="125" width="72" height="8" rx="2" fill="rgba(56,217,255,0.15)"/>
+              <rect x="88" y="125" width="66" height="8" rx="2" fill="rgba(34,232,122,0.5)"/>
+              <rect x="88" y="149" width="72" height="8" rx="2" fill="rgba(56,217,255,0.15)"/>
+              <rect x="88" y="149" width="35" height="8" rx="2" fill="rgba(56,217,255,0.5)"/>
+              <rect x="88" y="173" width="72" height="8" rx="2" fill="rgba(56,217,255,0.15)"/>
+              <rect x="88" y="173" width="20" height="8" rx="2" fill="rgba(255,68,68,0.5)"/>
+              <!-- Server rack 2 -->
+              <rect x="240" y="60" width="120" height="260" rx="8" fill="url(#rackGrad)" stroke="rgba(56,217,255,0.2)" stroke-width="1.5"/>
+              <rect x="248" y="72"  width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="248" y="96"  width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="248" y="120" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="248" y="144" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="248" y="168" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="248" y="192" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="248" y="216" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <rect x="248" y="240" width="104" height="18" rx="3" fill="rgba(56,217,255,0.08)" stroke="rgba(56,217,255,0.15)" stroke-width="1"/>
+              <circle class="led" cx="258" cy="81"  r="3" fill="#22e87a"/>
+              <circle class="led" cx="258" cy="105" r="3" fill="#38d9ff"/>
+              <circle class="led" cx="258" cy="129" r="3" fill="#22e87a"/>
+              <circle class="led" cx="258" cy="153" r="3" fill="#22e87a"/>
+              <circle class="led" cx="258" cy="177" r="3" fill="#38d9ff"/>
+              <circle class="led" cx="258" cy="201" r="3" fill="#22e87a"/>
+              <circle class="led" cx="258" cy="225" r="3" fill="#ff4444"/>
+              <circle class="led" cx="258" cy="249" r="3" fill="#22e87a"/>
+              <rect x="268" y="77"  width="72" height="8" rx="2" fill="rgba(56,217,255,0.15)"/>
+              <rect x="268" y="77"  width="62" height="8" rx="2" fill="rgba(56,217,255,0.5)"/>
+              <rect x="268" y="101" width="72" height="8" rx="2" fill="rgba(56,217,255,0.15)"/>
+              <rect x="268" y="101" width="50" height="8" rx="2" fill="rgba(34,232,122,0.5)"/>
+              <rect x="268" y="125" width="72" height="8" rx="2" fill="rgba(56,217,255,0.15)"/>
+              <rect x="268" y="125" width="38" height="8" rx="2" fill="rgba(56,217,255,0.5)"/>
+              <!-- Connecting cables -->
+              <path d="M180 120 Q210 120 240 130" stroke="rgba(56,217,255,0.4)" stroke-width="2" fill="none" stroke-dasharray="6 3"/>
+              <path d="M180 168 Q210 155 240 168" stroke="rgba(34,232,122,0.4)" stroke-width="2" fill="none" stroke-dasharray="6 3"/>
+              <path d="M180 216 Q210 210 240 216" stroke="rgba(56,217,255,0.3)" stroke-width="2" fill="none" stroke-dasharray="6 3"/>
+            </svg>
+          </div>
+          <div class="net-img-overlay"></div>
+          <div class="net-badge">
+            <div class="net-badge-dot"></div>
+            <span>180 nodes online <em>· Global</em></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE NETWORK FEED -->
+<section id="live">
+  <div class="si">
+    <div class="live-header fade-up">
+      <div class="sec-label">Live Network</div>
+      <h2 class="sec-title">Watch the network in real time.</h2>
+      <p class="sec-desc" style="max-width:520px;margin:0 auto;">Blocks confirming, transactions settling, validators online — right now, on Arc Light mainnet.</p>
+    </div>
+    <div class="live-grid">
+      <div class="live-stats fade-up">
+        <div class="live-stat-card">
+          <div>
+            <div class="ls-label">Current Block</div>
+            <div class="ls-value" id="lvBlock">12,847,392</div>
+          </div>
+          <div class="ls-pulse"></div>
+        </div>
+        <div class="live-stat-card">
+          <div>
+            <div class="ls-label">Transactions / sec</div>
+            <div class="ls-value" id="lvTps">42,180</div>
+          </div>
+          <div class="ls-pulse"></div>
+        </div>
+        <div class="live-stat-card">
+          <div>
+            <div class="ls-label">Avg. Block Time</div>
+            <div class="ls-value" id="lvBlockTime">412<span class="unit">ms</span></div>
+          </div>
+          <div class="ls-pulse"></div>
+        </div>
+        <div class="live-stat-card">
+          <div>
+            <div class="ls-label">Validators Online</div>
+            <div class="ls-value" id="lvVals">186<span class="unit">/186</span></div>
+          </div>
+          <div class="ls-pulse"></div>
+        </div>
+        <div class="live-stat-card">
+          <div>
+            <div class="ls-label">Total Value Locked</div>
+            <div class="ls-value" id="lvTvl">$4.28B</div>
+          </div>
+          <div class="ls-pulse"></div>
+        </div>
+      </div>
+
+      <div class="blocks-feed fade-up" style="transition-delay:.1s">
+        <div class="bf-head">
+          <div class="bf-title">Latest Blocks</div>
+          <div class="bf-live"><div class="bf-live-dot"></div>Live</div>
+        </div>
+        <div class="bf-list" id="bfList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOKENOMICS -->
+<section id="token">
+  <div class="si">
+    <div class="token-header fade-up">
+      <div class="sec-label">$ARC Token</div>
+      <h2 class="sec-title">Powering the network.</h2>
+      <p class="sec-desc" style="max-width:540px;margin:0 auto;">$ARC secures the protocol via staking, pays for execution, and grants governance rights to the people building on Arc Light.</p>
+    </div>
+    <div class="token-grid">
+      <div class="token-chart-wrap fade-up">
+        <svg class="token-chart" viewBox="0 0 200 200">
+          <!-- Donut segments. Circumference = 2*pi*70 ≈ 439.82 -->
+          <!-- 35% Community: 153.94 -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#38d9ff" stroke-width="32"
+            stroke-dasharray="153.94 439.82" stroke-dashoffset="0"/>
+          <!-- 22% Ecosystem: 96.76 -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#1a6fff" stroke-width="32"
+            stroke-dasharray="96.76 439.82" stroke-dashoffset="-153.94"/>
+          <!-- 18% Team: 79.17 -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#6f42ff" stroke-width="32"
+            stroke-dasharray="79.17 439.82" stroke-dashoffset="-250.7"/>
+          <!-- 15% Investors: 65.97 -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#22e87a" stroke-width="32"
+            stroke-dasharray="65.97 439.82" stroke-dashoffset="-329.87"/>
+          <!-- 10% Treasury: 43.98 -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#ffc857" stroke-width="32"
+            stroke-dasharray="43.98 439.82" stroke-dashoffset="-395.84"/>
+        </svg>
+        <div class="token-center">
+          <div class="tc-coin">ARC</div>
+          <div class="tc-name">Total Supply</div>
+          <div class="tc-supply">1,000,000,000</div>
+        </div>
+      </div>
+      <div class="token-legend fade-up" style="transition-delay:.1s">
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#38d9ff;"></div>
+          <div class="tl-text"><div class="tl-name">Community & Airdrops</div><div class="tl-desc">Distributed to early users, builders, and contributors</div></div>
+          <div class="tl-pct">35%</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#1a6fff;"></div>
+          <div class="tl-text"><div class="tl-name">Ecosystem & Grants</div><div class="tl-desc">Funding apps and infrastructure on Arc Light</div></div>
+          <div class="tl-pct">22%</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#6f42ff;"></div>
+          <div class="tl-text"><div class="tl-name">Core Team</div><div class="tl-desc">4-year vesting with 1-year cliff</div></div>
+          <div class="tl-pct">18%</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#22e87a;"></div>
+          <div class="tl-text"><div class="tl-name">Strategic Investors</div><div class="tl-desc">3-year vesting, no early unlock</div></div>
+          <div class="tl-pct">15%</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:#ffc857;"></div>
+          <div class="tl-text"><div class="tl-name">DAO Treasury</div><div class="tl-desc">Controlled by $ARC holders via governance</div></div>
+          <div class="tl-pct">10%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="si">
+    <div class="about-grid">
+      <div class="about-img-wrap fade-up">
+        <div class="about-img" style="min-height:380px;background:linear-gradient(160deg,#020b18 0%,#05132b 50%,#071e45 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+          <svg viewBox="0 0 420 380" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+            <defs>
+              <filter id="ef"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <radialGradient id="earthGrad" cx="50%" cy="45%" r="50%">
+                <stop offset="0%" stop-color="#1a4a8a"/>
+                <stop offset="40%" stop-color="#0f3366"/>
+                <stop offset="100%" stop-color="#061828"/>
+              </radialGradient>
+              <style>
+                .orb { animation: orbPulse 4s ease-in-out infinite; }
+                @keyframes orbPulse { 0%,100%{opacity:.7} 50%{opacity:1} }
+                .arc-line { animation: arcDash 6s linear infinite; }
+                @keyframes arcDash { from{stroke-dashoffset:300} to{stroke-dashoffset:0} }
+              </style>
+            </defs>
+            <!-- Stars -->
+            <circle cx="30"  cy="25"  r="1"   fill="rgba(255,255,255,0.7)"/>
+            <circle cx="80"  cy="15"  r="1.5" fill="rgba(255,255,255,0.6)"/>
+            <circle cx="350" cy="30"  r="1"   fill="rgba(255,255,255,0.8)"/>
+            <circle cx="395" cy="60"  r="1.5" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="25"  cy="330" r="1"   fill="rgba(255,255,255,0.6)"/>
+            <circle cx="390" cy="310" r="1.5" fill="rgba(255,255,255,0.7)"/>
+            <circle cx="60"  cy="280" r="1"   fill="rgba(255,255,255,0.5)"/>
+            <circle cx="370" cy="150" r="1"   fill="rgba(255,255,255,0.6)"/>
+            <!-- Earth globe -->
+            <circle cx="210" cy="185" r="130" fill="url(#earthGrad)" filter="url(#ef)"/>
+            <circle cx="210" cy="185" r="130" fill="none" stroke="rgba(56,217,255,0.2)" stroke-width="2"/>
+            <!-- Continent shapes (simplified) -->
+            <path d="M160 130 Q175 120 195 125 Q210 115 230 122 Q245 130 240 148 Q230 162 215 158 Q200 165 185 155 Q168 148 160 130Z" fill="rgba(34,140,80,0.45)"/>
+            <path d="M240 155 Q258 148 272 158 Q280 170 270 182 Q258 190 244 184 Q232 175 240 155Z" fill="rgba(34,140,80,0.4)"/>
+            <path d="M170 195 Q182 188 196 195 Q205 208 198 220 Q185 228 173 218 Q164 207 170 195Z" fill="rgba(34,140,80,0.38)"/>
+            <path d="M225 205 Q240 198 255 205 Q265 218 258 230 Q245 236 232 228 Q220 218 225 205Z" fill="rgba(34,140,80,0.35)"/>
+            <!-- Atmosphere glow -->
+            <circle cx="210" cy="185" r="140" fill="none" stroke="rgba(56,217,255,0.12)" stroke-width="18" filter="url(#ef)"/>
+            <!-- Orbit rings -->
+            <ellipse cx="210" cy="185" rx="170" ry="45" fill="none" stroke="rgba(56,217,255,0.18)" stroke-width="1.5" stroke-dasharray="8 5"/>
+            <ellipse cx="210" cy="185" rx="170" ry="45" fill="none" stroke="rgba(56,217,255,0.08)" stroke-width="1" transform="rotate(50,210,185)" stroke-dasharray="8 5"/>
+            <!-- Orbit nodes -->
+            <circle class="orb" cx="40"  cy="185" r="5" fill="#38d9ff" filter="url(#ef)"/>
+            <circle class="orb" cx="380" cy="185" r="5" fill="#38d9ff" filter="url(#ef)" style="animation-delay:2s"/>
+            <circle class="orb" cx="280" cy="82"  r="4" fill="#38d9ff" filter="url(#ef)" style="animation-delay:.8s"/>
+            <circle class="orb" cx="138" cy="82"  r="4" fill="#38d9ff" filter="url(#ef)" style="animation-delay:1.6s"/>
+            <!-- Arc light streak -->
+            <path class="arc-line" d="M60 310 Q130 240 210 185 Q290 130 360 80" stroke="rgba(56,217,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="12 6" filter="url(#ef)"/>
+            <circle cx="360" cy="80" r="5" fill="white" filter="url(#ef)"/>
+            <line x1="360" y1="70" x2="360" y2="90" stroke="white" stroke-width="1.5" opacity=".8"/>
+            <line x1="350" y1="80" x2="370" y2="80" stroke="white" stroke-width="1.5" opacity=".8"/>
+          </svg>
+        </div>
+        <div class="about-img-overlay"></div>
+      </div>
+      <div class="fade-up" style="transition-delay:.15s">
+        <div class="sec-label">About Arc Light Labs</div>
+        <h2 class="sec-title">Moving at the<br>Speed of Light</h2>
+        <p class="sec-desc">Arc Light Labs was founded to solve the fundamental trilemma of distributed systems: speed, security, and decentralization. We've built a platform where you don't have to choose.</p>
+        <p class="sec-desc" style="margin-top:1rem;">Our proprietary Arc consensus mechanism achieves sub-100ms finality across a globally distributed validator network — enabling a new class of real-time applications that simply weren't possible before.</p>
+        <div class="about-stats">
+          <div><span class="a-stat-val">2023</span><span class="a-stat-lbl">Founded</span></div>
+          <div><span class="a-stat-val">$42M</span><span class="a-stat-lbl">Raised</span></div>
+          <div><span class="a-stat-val">38</span><span class="a-stat-lbl">Team Members</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="si">
+    <div class="rm-header fade-up">
+      <div class="sec-label">Roadmap</div>
+      <h2 class="sec-title">The path to a billion users.</h2>
+      <p class="sec-desc" style="max-width:520px;margin:0 auto;">A look at where we've been, what we're shipping now, and where we're headed next.</p>
+    </div>
+    <div class="rm-timeline">
+      <div class="rm-row left fade-up">
+        <div class="rm-card">
+          <div class="rm-q">Q4 2024</div>
+          <div class="rm-title">Genesis Mainnet</div>
+          <div class="rm-desc">Arc Consensus launched with 64 founding validators. First production block confirmed in 38ms.</div>
+          <span class="rm-tag done">✓ Shipped</span>
+        </div>
+        <div class="rm-node done">✓</div>
+      </div>
+      <div class="rm-row right fade-up" style="transition-delay:.05s">
+        <div class="rm-node done">✓</div>
+        <div class="rm-card">
+          <div class="rm-q">Q1 2025</div>
+          <div class="rm-title">Parallel EVM Live</div>
+          <div class="rm-desc">Concurrent transaction execution rolled out, pushing throughput past 100K TPS sustained.</div>
+          <span class="rm-tag done">✓ Shipped</span>
+        </div>
+      </div>
+      <div class="rm-row left fade-up" style="transition-delay:.1s">
+        <div class="rm-card">
+          <div class="rm-q">Q2 2025</div>
+          <div class="rm-title">Arc Bridge v1</div>
+          <div class="rm-desc">Trustless cross-chain bridge to Ethereum, Solana, and Bitcoin networks with 10-minute finality.</div>
+          <span class="rm-tag done">✓ Shipped</span>
+        </div>
+        <div class="rm-node done">✓</div>
+      </div>
+      <div class="rm-row right fade-up" style="transition-delay:.15s">
+        <div class="rm-node">04</div>
+        <div class="rm-card">
+          <div class="rm-q">Q1 2026</div>
+          <div class="rm-title">$ARC Token Launch</div>
+          <div class="rm-desc">Token generation event, community airdrop, and full transition to permissionless validator set.</div>
+          <span class="rm-tag now">In Progress</span>
+        </div>
+      </div>
+      <div class="rm-row left fade-up" style="transition-delay:.2s">
+        <div class="rm-card">
+          <div class="rm-q">Q2 2026</div>
+          <div class="rm-title">ZK Rollup Framework</div>
+          <div class="rm-desc">Open SDK for builders to launch their own ZK-powered app-chains anchored to Arc Light.</div>
+          <span class="rm-tag next">Planned</span>
+        </div>
+        <div class="rm-node">05</div>
+      </div>
+      <div class="rm-row right fade-up" style="transition-delay:.25s">
+        <div class="rm-node">06</div>
+        <div class="rm-card">
+          <div class="rm-q">Q4 2026</div>
+          <div class="rm-title">Dynamic Sharding GA</div>
+          <div class="rm-desc">Auto-scaling execution shards with cross-shard atomic composability — billion-user ready.</div>
+          <span class="rm-tag next">Planned</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="si">
+    <div class="ts-header fade-up">
+      <div class="sec-label">Builders Speak</div>
+      <h2 class="sec-title">Trusted by the people<br>shipping the future.</h2>
+    </div>
+    <div class="ts-grid">
+      <div class="ts-card fade-up">
+        <div class="ts-quote-mark">"</div>
+        <div class="ts-stars"><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span></div>
+        <p class="ts-text">We migrated our entire DEX from Ethereum to Arc Light in a weekend. Throughput is up 40x and our users are actually using limit orders again because they're free.</p>
+        <div class="ts-author">
+          <div class="ts-avatar" style="background:linear-gradient(135deg,#ff6b35,#f7931e);">EM</div>
+          <div><div class="ts-meta-name">Elena Marchetti</div><div class="ts-meta-role">CTO · Helix Exchange</div></div>
+        </div>
+      </div>
+      <div class="ts-card fade-up" style="transition-delay:.08s">
+        <div class="ts-quote-mark">"</div>
+        <div class="ts-stars"><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span></div>
+        <p class="ts-text">Finality in 50ms means our onchain game finally feels like a Web2 game. Players don't even know they're using a blockchain — and that's exactly the point.</p>
+        <div class="ts-author">
+          <div class="ts-avatar" style="background:linear-gradient(135deg,#22e87a,#0093e9);">JK</div>
+          <div><div class="ts-meta-name">Jordan Kim</div><div class="ts-meta-role">Founder · Chronoforge</div></div>
+        </div>
+      </div>
+      <div class="ts-card fade-up" style="transition-delay:.16s">
+        <div class="ts-quote-mark">"</div>
+        <div class="ts-stars"><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span></div>
+        <p class="ts-text">The dev tooling is genuinely the best I've ever used in crypto. Local devnet boots in 2 seconds. The CLI is a joy. Everything just works.</p>
+        <div class="ts-author">
+          <div class="ts-avatar" style="background:linear-gradient(135deg,#6f42ff,#38d9ff);">RP</div>
+          <div><div class="ts-meta-name">Ravi Patel</div><div class="ts-meta-role">Lead Engineer · Stellar Pay</div></div>
+        </div>
+      </div>
+      <div class="ts-card fade-up" style="transition-delay:.04s">
+        <div class="ts-quote-mark">"</div>
+        <div class="ts-stars"><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span></div>
+        <p class="ts-text">$0.0001 per transaction unlocks entire categories of products that were previously economically impossible. We launched a streaming-payments app on Arc Light and we couldn't have done it anywhere else.</p>
+        <div class="ts-author">
+          <div class="ts-avatar" style="background:linear-gradient(135deg,#ffc857,#ff6b35);">SL</div>
+          <div><div class="ts-meta-name">Sara Lin</div><div class="ts-meta-role">Co-founder · DripFi</div></div>
+        </div>
+      </div>
+      <div class="ts-card fade-up" style="transition-delay:.12s">
+        <div class="ts-quote-mark">"</div>
+        <div class="ts-stars"><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span></div>
+        <p class="ts-text">Their security team caught two issues during our audit prep that would've cost us millions. The Arc Light core team treats partners like an extension of their own.</p>
+        <div class="ts-author">
+          <div class="ts-avatar" style="background:linear-gradient(135deg,#0093e9,#1a6fff);">DV</div>
+          <div><div class="ts-meta-name">Dmitri Volkov</div><div class="ts-meta-role">Security Lead · Mintbase</div></div>
+        </div>
+      </div>
+      <div class="ts-card fade-up" style="transition-delay:.2s">
+        <div class="ts-quote-mark">"</div>
+        <div class="ts-stars"><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span><span class="ts-star">★</span></div>
+        <p class="ts-text">EVM-compatibility meant zero rewrites. We deployed our existing Solidity contracts and were live on Arc Light mainnet inside 4 hours. Genuinely unreal.</p>
+        <div class="ts-author">
+          <div class="ts-avatar" style="background:linear-gradient(135deg,#ff5577,#6f42ff);">AO</div>
+          <div><div class="ts-meta-name">Adaeze Okafor</div><div class="ts-meta-role">CEO · Lattice Labs</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="si">
+    <div class="faq-grid">
+      <div class="fade-up">
+        <div class="sec-label">FAQ</div>
+        <h2 class="sec-title">Frequently asked questions.</h2>
+        <p class="sec-desc">Still have questions after reading? Hop into our Discord — the core team responds personally.</p>
+        <a href="https://discord.gg/rcKfHMF8" target="_blank" rel="noopener" class="btn-ghost" style="margin-top:1.5rem;">
+          Ask in Discord
+          <svg width="14" height="14" viewBox="0 0 127.14 96.36" fill="currentColor"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+        </a>
+      </div>
+      <div class="faq-list fade-up" style="transition-delay:.1s">
+        <div class="faq-item">
+          <button class="faq-q">How is Arc Light different from other L1 blockchains?<span class="faq-icon"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Arc Light is the first chain combining sub-50ms finality with full EVM compatibility and sharded execution. Most chains pick two of {speed, security, decentralization} — Arc Consensus achieves all three through a novel BFT variant with pipelined execution.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Is the network production-ready today?<span class="faq-icon"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Yes. Mainnet went live in Q4 2024 and has processed over 12M blocks with 99.99% uptime. Several billion-dollar protocols have already migrated. We have a $10M bug bounty and full formal verification of consensus.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Can I deploy my existing Solidity contracts?<span class="faq-icon"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Absolutely. Arc Light is fully EVM-equivalent. Deploy your existing contracts with Hardhat, Foundry, or Remix using the same toolchain you already know. Most teams migrate in hours, not weeks.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">When does the $ARC token launch?<span class="faq-icon"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Q1 2026. The token will launch alongside the community airdrop and the transition to a fully permissionless validator set. Join our Discord for the most up-to-date announcements.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How do I become a validator?<span class="faq-icon"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Today the validator set is permissioned at 186 nodes operated by partners worldwide. After the $ARC launch, anyone meeting the staking requirement (32,000 ARC) and uptime SLA can run a validator.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">What about gas fees and MEV?<span class="faq-icon"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Average transaction fees are around $0.0001 thanks to parallel execution. MEV is mitigated with encrypted mempools and threshold-decryption built into the protocol — no flashbots-style auctions, no front-running.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Is Arc Light environmentally sustainable?<span class="faq-icon"></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Yes. As a Proof-of-Stake network, Arc Light uses 99.9% less energy than Proof-of-Work chains. We additionally offset our remaining footprint via verified carbon credits funded directly from protocol revenue.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAREERS -->
+<section id="careers">
+  <div class="si">
+    <div class="careers-header fade-up">
+      <div class="sec-label">Careers</div>
+      <h2 class="sec-title">Build the future with us.</h2>
+      <p class="sec-desc" style="max-width:500px;margin:0 auto;">We're a small team with massive ambition. If you want your work to be felt by millions of developers and users, this is where you belong.</p>
+    </div>
+
+    <div class="jobs">
+      <div class="job-card fade-up" onclick="openModal('Senior Protocol Engineer')">
+        <div><h3>Senior Protocol Engineer</h3><div class="job-meta"><span class="tag dept">Engineering</span><span class="tag type">Full-time</span><span class="tag loc">Remote · Global</span></div></div>
+        <button class="job-btn" onclick="event.stopPropagation();openModal('Senior Protocol Engineer')">Apply →</button>
+      </div>
+      <div class="job-card fade-up" style="transition-delay:.05s" onclick="openModal('ZK / Cryptography Researcher')">
+        <div><h3>ZK / Cryptography Researcher</h3><div class="job-meta"><span class="tag dept">Research</span><span class="tag type">Full-time</span><span class="tag loc">Remote · Global</span></div></div>
+        <button class="job-btn" onclick="event.stopPropagation();openModal('ZK / Cryptography Researcher')">Apply →</button>
+      </div>
+      <div class="job-card fade-up" style="transition-delay:.1s" onclick="openModal('Developer Relations Engineer')">
+        <div><h3>Developer Relations Engineer</h3><div class="job-meta"><span class="tag dept">DevRel</span><span class="tag type">Full-time</span><span class="tag loc">Remote · US/EU</span></div></div>
+        <button class="job-btn" onclick="event.stopPropagation();openModal('Developer Relations Engineer')">Apply →</button>
+      </div>
+      <div class="job-card fade-up" style="transition-delay:.15s" onclick="openModal('Senior Frontend Engineer')">
+        <div><h3>Senior Frontend Engineer</h3><div class="job-meta"><span class="tag dept">Engineering</span><span class="tag type">Full-time</span><span class="tag loc">Remote · Global</span></div></div>
+        <button class="job-btn" onclick="event.stopPropagation();openModal('Senior Frontend Engineer')">Apply →</button>
+      </div>
+      <div class="job-card fade-up" style="transition-delay:.2s" onclick="openModal('Head of Growth')">
+        <div><h3>Head of Growth</h3><div class="job-meta"><span class="tag dept">Growth</span><span class="tag type">Full-time</span><span class="tag loc">NYC · SF · Remote</span></div></div>
+        <button class="job-btn" onclick="event.stopPropagation();openModal('Head of Growth')">Apply →</button>
+      </div>
+      <div class="job-card fade-up" style="transition-delay:.25s" onclick="openModal('Security Engineer')">
+        <div><h3>Security Engineer</h3><div class="job-meta"><span class="tag dept">Security</span><span class="tag type">Full-time</span><span class="tag loc">Remote · Global</span></div></div>
+        <button class="job-btn" onclick="event.stopPropagation();openModal('Security Engineer')">Apply →</button>
+      </div>
+    </div>
+
+    <div class="open-apply fade-up">
+      <h3>Don't see your role?</h3>
+      <p>We hire exceptional people regardless of the opening. Send us your story.</p>
+      <button class="btn-primary" onclick="openModal('Open Application')" style="font-size:.85rem;padding:11px 26px;">
+        Submit Open Application
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- DISCORD -->
+<div class="discord-band fade-up">
+  <div class="discord-inner">
+    <div class="discord-left">
+      <div class="discord-logo">
+        <!-- Official Discord Clyde logo SVG -->
+        <svg width="42" height="42" viewBox="0 0 127.14 96.36" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+        </svg>
+      </div>
+      <div class="discord-text">
+        <h2>Join the Arc Light<br>Community</h2>
+        <p>Get early access, connect with the core team, and build alongside thousands of developers shipping on Arc Light Labs.</p>
+        <div class="discord-members">
+          <div class="discord-avatars">
+            <span>AJ</span><span>MK</span><span>RX</span><span>TS</span><span>+</span>
+          </div>
+          <span class="discord-members-text"><span class="discord-online"></span>Live in our Discord right now</span>
+        </div>
+      </div>
+    </div>
+    <a href="https://discord.gg/rcKfHMF8" target="_blank" rel="noopener" class="btn-discord">
+      <svg width="22" height="22" viewBox="0 0 127.14 96.36" fill="#5865f2"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+      Join Discord
+    </a>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-band fade-up">
+  <div class="cta-bg"></div>
+  <div class="cta-inner">
+    <div class="sec-label" style="justify-content:center;margin-bottom:1rem;">Get Started</div>
+    <h2 class="cta-title">Ready to build at<br>the speed of light?</h2>
+    <p class="cta-desc">Join thousands of developers already building on Arc Light Labs. Testnet access is free, instant, and fully permissionless.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn-primary">Start Building Free <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="#" class="btn-ghost">Read the Docs</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-inner">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <a class="nav-logo nav-logo--footer" href="#hero">
+          <img class="nav-logo-img" src="arc-light-logo.png" width="36" height="36" alt="" decoding="async" />
+          <span class="nav-logo-text">Arc Light Labs</span>
+        </a>
+        <p>Building the infrastructure layer for the next generation of decentralized applications.</p>
+      </div>
+      <div class="ft-links">
+        <div class="ft-col">
+          <h4>Platform</h4>
+          <ul><li><a href="#stack">The Stack</a></li><li><a href="#solutions">Solutions</a></li><li><a href="#benefits">Benefits</a></li><li><a href="#technology">Technology</a></li><li><a href="#">Documentation</a></li></ul>
+        </div>
+        <div class="ft-col">
+          <h4>Company</h4>
+          <ul><li><a href="#about">About</a></li><li><a href="#careers">Careers</a></li><li><a href="#">Blog</a></li><li><a href="#">Press</a></li></ul>
+        </div>
+        <div class="ft-col">
+          <h4>Resources</h4>
+          <ul><li><a href="#">Whitepaper</a></li><li><a href="#">GitHub</a></li><li><a href="#">Bug Bounty</a></li><li><a href="#">Community</a></li></ul>
+        </div>
+      </div>
+    </div>
+    <div class="ft-news">
+      <div>
+        <h4>Stay ahead of the curve</h4>
+        <p>Mainnet upgrades, $ARC milestones, and builder grants — one email a month, zero spam.</p>
+      </div>
+      <div class="ft-news-right">
+        <form class="ft-news-form" id="ftNewsForm" onsubmit="return ftNewsSubmit(event)">
+          <input type="email" name="email" placeholder="you@protocol.xyz" required autocomplete="email" />
+          <button type="submit">Subscribe</button>
+        </form>
+        <p id="ftNewsToast" role="status">You’re in. Watch your inbox.</p>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <p>© 2026 Arc Light Labs, Inc. All rights reserved.</p>
+      <div class="ft-socials">
+        <a href="#" class="soc">𝕏</a>
+        <a href="https://discord.gg/rcKfHMF8" target="_blank" rel="noopener" class="soc" title="Discord"><svg width="13" height="13" viewBox="0 0 127.14 96.36" fill="currentColor"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg></a>
+        <a href="#" class="soc"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg></a>
+        <a href="#" class="soc">T</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div class="modal-title">Apply to Arc Light Labs</div>
+    <div class="modal-role" id="modal-role">Role</div>
+    <form id="app-form" onsubmit="submitForm(event)">
+      <div class="form-row">
+        <div class="fg"><label>First Name</label><input type="text" name="firstName" placeholder="Satoshi" required/></div>
+        <div class="fg"><label>Last Name</label><input type="text" name="lastName" placeholder="Nakamoto" required/></div>
+      </div>
+      <div class="fg"><label>Email Address</label><input type="email" name="email" placeholder="you@example.com" required/></div>
+      <div class="fg"><label>LinkedIn / Portfolio URL</label><input type="url" name="linkedin" placeholder="https://linkedin.com/in/..."/></div>
+      <div class="fg">
+        <label>Role Applying For</label>
+        <select id="role-select" name="role">
+          <option>Senior Protocol Engineer</option>
+          <option>ZK / Cryptography Researcher</option>
+          <option>Developer Relations Engineer</option>
+          <option>Senior Frontend Engineer</option>
+          <option>Head of Growth</option>
+          <option>Security Engineer</option>
+          <option>Open Application</option>
+        </select>
+      </div>
+      <div class="fg"><label>Why Arc Light Labs?</label><textarea name="message" placeholder="Tell us what excites you about building at Arc Light Labs and what you'd bring to the team..." required></textarea></div>
+      <button type="submit" class="form-sub" id="app-submit-btn">Submit Application →</button>
+      <p id="app-error" style="display:none;margin-top:1rem;font-size:.85rem;color:#ff6b6b;text-align:center;"></p>
+    </form>
+    <div class="form-success" id="fs">
+      <div class="fs-check">✓</div>
+      <h3>Application Received!</h3>
+      <p>Thanks for applying. Our team reviews every application personally. We'll be in touch within 5–7 business days.</p>
+      <div style="margin-top:1.8rem;padding:1.4rem 1.6rem;background:linear-gradient(135deg,rgba(88,101,242,.18),rgba(56,217,255,.08));border:1px solid rgba(88,101,242,.35);border-radius:14px;">
+        <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(226,234,255,.45);margin-bottom:.5rem;">While you wait</p>
+        <p style="font-size:.9rem;color:rgba(226,234,255,.7);margin-bottom:1.1rem;line-height:1.6;">Join our Discord to connect with the team, get updates, and meet the builders already on Arc Light Labs.</p>
+        <a href="https://discord.gg/rcKfHMF8" target="_blank" rel="noopener"
+           style="display:inline-flex;align-items:center;gap:9px;padding:12px 24px;background:linear-gradient(135deg,#5865f2,#7289da);border-radius:99px;font-size:.88rem;font-weight:800;color:#fff;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 6px 24px rgba(88,101,242,.4);"
+           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(88,101,242,.55)'"
+           onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(88,101,242,.4)'">
+          <svg width="18" height="18" viewBox="0 0 127.14 96.36" fill="white"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+          Join our Discord
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Particles
+  (function(){
+    const c = document.getElementById('pts');
+    for(let i=0;i<40;i++){
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.cssText = `left:${Math.random()*100}%;bottom:${Math.random()*30}%;--dur:${6+Math.random()*10}s;--delay:${Math.random()*8}s;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;`;
+      c.appendChild(p);
+    }
+  })();
+
+  // Navbar
+  window.addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', scrollY > 40));
+
+  // Fade-up
+  const obs = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('visible')), {threshold:.1,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); }
+  }));
+
+  // Modal
+  function openModal(role){
+    document.getElementById('modal-role').textContent = role;
+    const sel = document.getElementById('role-select');
+    for(let o of sel.options) if(o.value===role){ o.selected=true; break; }
+    document.getElementById('app-form').style.display = 'block';
+    document.getElementById('fs').style.display = 'none';
+    document.getElementById('modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(){
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+  document.addEventListener('keydown', e => e.key==='Escape' && closeModal());
+  async function submitForm(e){
+    e.preventDefault();
+    const form = document.getElementById('app-form');
+    const btn  = document.getElementById('app-submit-btn');
+    const err  = document.getElementById('app-error');
+    err.style.display = 'none';
+    err.textContent = '';
+    const originalBtnText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const payload = {
+      firstName: form.firstName.value.trim(),
+      lastName:  form.lastName.value.trim(),
+      email:     form.email.value.trim(),
+      linkedin:  form.linkedin.value.trim(),
+      role:      form.role.value,
+      message:   form.message.value.trim(),
+      pageUrl:   window.location.href,
+      userAgent: navigator.userAgent,
+      submittedAt: new Date().toISOString()
+    };
+
+    try {
+      const res = await fetch('/api/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+      form.style.display = 'none';
+      document.getElementById('fs').style.display = 'block';
+      form.reset();
+    } catch (ex) {
+      err.textContent = 'Something went wrong: ' + ex.message + '. Please try again or email us directly.';
+      err.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalBtnText;
+    }
+  }
+
+  // Keep arcs visible after draw
+  setTimeout(()=>{
+    document.querySelectorAll('.as').forEach((el,i)=>{
+      el.style.strokeDashoffset='0'; el.style.opacity='.55';
+      el.style.animation=`none`;
+    });
+  },4500);
+
+  /* ─────────────────────────────────────────────────────────
+     PRELOADER
+     ───────────────────────────────────────────────────────── */
+  window.addEventListener('load', () => {
+    const delay = document.documentElement.classList.contains('reduce-motion') ? 0 : 650;
+    setTimeout(() => document.getElementById('preloader').classList.add('gone'), delay);
+  });
+
+  /* ─────────────────────────────────────────────────────────
+     CURSOR GLOW
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const g = document.getElementById('cursorGlow');
+    let tx=0, ty=0, cx=0, cy=0;
+    window.addEventListener('mousemove', e => { tx=e.clientX; ty=e.clientY; });
+    function tick(){
+      cx += (tx-cx)*0.12; cy += (ty-cy)*0.12;
+      g.style.transform = `translate(${cx}px, ${cy}px) translate(-50%,-50%)`;
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     HERO MOUSE PARALLAX
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const hero = document.getElementById('hero');
+    const orbs = hero.querySelectorAll('.aur-orb');
+    const star = hero.querySelector('.starburst');
+    hero.addEventListener('mousemove', e => {
+      const r = hero.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5;
+      const y = (e.clientY - r.top) / r.height - .5;
+      orbs.forEach((o,i) => {
+        const f = (i+1) * 14;
+        o.style.transform = `translate(${x*f}px, ${y*f}px)`;
+      });
+      if (star) star.style.transform = `translate(${x*-22}px, ${y*-22}px)`;
+    });
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     ANIMATED COUNTERS
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const fmt = (v, d) => {
+      if (d > 0) return v.toFixed(d);
+      return Math.floor(v).toLocaleString();
+    };
+    const animate = el => {
+      if (el.dataset.done) return;
+      el.dataset.done = '1';
+      const target = parseFloat(el.dataset.count);
+      const dec = parseInt(el.dataset.decimals || '0');
+      const pre = el.dataset.prefix || '';
+      const suf = el.dataset.suffix || '';
+      const dur = 1600; const start = performance.now();
+      function step(now){
+        const t = Math.min(1, (now-start)/dur);
+        const eased = 1 - Math.pow(1-t, 3);
+        el.textContent = pre + fmt(target * eased, dec) + suf;
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    };
+    const obs = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && animate(e.target)), {threshold:.4});
+    document.querySelectorAll('[data-count]').forEach(el => obs.observe(el));
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     3D TILT (sol cards, ben cards, ts cards)
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const targets = document.querySelectorAll('.sol-card, .ben-card, .ts-card, .live-stat-card, .bento-item');
+    targets.forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5;
+        const y = (e.clientY - r.top) / r.height - .5;
+        card.style.transform = `perspective(900px) rotateX(${y*-5}deg) rotateY(${x*7}deg) translateY(-4px)`;
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     MAGNETIC BUTTONS
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    document.querySelectorAll('.btn-primary, .btn-ghost, .btn-discord, .job-btn, .ft-news-form button').forEach(btn => {
+      btn.addEventListener('mousemove', e => {
+        const r = btn.getBoundingClientRect();
+        const x = e.clientX - r.left - r.width/2;
+        const y = e.clientY - r.top - r.height/2;
+        btn.style.transform = `translate(${x*0.18}px, ${y*0.25}px)`;
+      });
+      btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+    });
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     MOBILE HAMBURGER
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const h = document.getElementById('hamburger');
+    const nl = document.getElementById('navLinks');
+    h.addEventListener('click', () => {
+      h.classList.toggle('open');
+      nl.classList.toggle('open');
+    });
+    nl.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      h.classList.remove('open'); nl.classList.remove('open');
+    }));
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     FAQ ACCORDION
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    document.querySelectorAll('.faq-item').forEach(item => {
+      const q = item.querySelector('.faq-q');
+      const a = item.querySelector('.faq-a');
+      q.addEventListener('click', () => {
+        const isOpen = item.classList.toggle('open');
+        a.style.maxHeight = isOpen ? a.scrollHeight + 'px' : '0';
+      });
+    });
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     LIVE PRICE TICKER
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const coins = [
+      { sym:'ARC',  name:'Arc Light',     price: 4.82,    chg: +12.4, color1:'#1a6fff', color2:'#38d9ff' },
+      { sym:'BTC',  name:'Bitcoin',       price: 98234.18,chg: +2.1,  color1:'#f7931a', color2:'#ffb84d' },
+      { sym:'ETH',  name:'Ethereum',      price: 3812.42, chg: -0.8,  color1:'#627eea', color2:'#8b9df0' },
+      { sym:'SOL',  name:'Solana',        price: 187.55,  chg: +4.6,  color1:'#9945ff', color2:'#14f195' },
+      { sym:'USDC', name:'USD Coin',      price: 1.0001,  chg: +0.01, color1:'#2775ca', color2:'#5b9ed8' },
+      { sym:'AVAX', name:'Avalanche',     price: 38.92,   chg: -1.4,  color1:'#e84142', color2:'#ff6b6c' },
+      { sym:'LINK', name:'Chainlink',     price: 22.18,   chg: +3.2,  color1:'#2a5ada', color2:'#5b85e5' },
+      { sym:'UNI',  name:'Uniswap',       price: 12.74,   chg: +1.8,  color1:'#ff007a', color2:'#ff5ba7' },
+      { sym:'ARB',  name:'Arbitrum',      price: 0.84,    chg: -2.3,  color1:'#28a0f0', color2:'#5cc1ff' },
+      { sym:'OP',   name:'Optimism',      price: 1.92,    chg: +5.7,  color1:'#ff0420', color2:'#ff5466' },
+      { sym:'ATOM', name:'Cosmos',        price: 7.45,    chg: +0.6,  color1:'#2e3148', color2:'#6f7390' },
+      { sym:'DOT',  name:'Polkadot',      price: 6.18,    chg: -1.1,  color1:'#e6007a', color2:'#ff5ab1' },
+    ];
+    const fmtP = p => p >= 1000 ? p.toLocaleString(undefined,{maximumFractionDigits:0})
+                   : p >= 1    ? p.toFixed(2)
+                              : p.toFixed(4);
+    const make = c => {
+      const up = c.chg >= 0;
+      return `<div class="tk-item">
+        <div class="tk-icon" style="background:linear-gradient(135deg,${c.color1},${c.color2})">${c.sym[0]}</div>
+        <div class="tk-sym">${c.sym}</div>
+        <div class="tk-price" data-sym="${c.sym}">$${fmtP(c.price)}</div>
+        <div class="tk-chg ${up?'tk-up':'tk-down'}">${up?'▲':'▼'} ${Math.abs(c.chg).toFixed(2)}%</div>
+      </div>`;
+    };
+    const track = document.getElementById('tickerTrack');
+    const html = coins.map(make).join('');
+    track.innerHTML = html + html; // duplicate for seamless loop
+
+    // Simulate live price ticks
+    setInterval(() => {
+      coins.forEach(c => {
+        const drift = (Math.random() - 0.5) * c.price * 0.002;
+        c.price = Math.max(0.0001, c.price + drift);
+      });
+      document.querySelectorAll('.tk-price').forEach(el => {
+        const c = coins.find(x => x.sym === el.dataset.sym);
+        if (c) el.textContent = '$' + fmtP(c.price);
+      });
+    }, 2200);
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     BACKERS MARQUEE
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const backers = [
+      'Paradigm', 'a16z crypto', 'Sequoia', 'Polychain',
+      'Multicoin', 'Coinbase Ventures', 'Pantera', 'Dragonfly',
+      'Variant', 'Electric Capital', 'Standard Crypto', 'Founders Fund'
+    ];
+    const dot = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>`;
+    const make = name => `<div class="backer-logo">${dot}${name}</div>`;
+    const track = document.getElementById('backersTrack');
+    const html = backers.map(make).join('');
+    track.innerHTML = html + html;
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     LIVE NETWORK FEED + COUNTERS
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    let block = 12847392;
+    let tps = 42180;
+    let blockTime = 412;
+    let tvl = 4.28;
+    const lvBlock = document.getElementById('lvBlock');
+    const lvTps = document.getElementById('lvTps');
+    const lvBT = document.getElementById('lvBlockTime');
+    const lvTvl = document.getElementById('lvTvl');
+    const list = document.getElementById('bfList');
+
+    const randHex = n => Array.from({length:n}, () => "0123456789abcdef"[Math.floor(Math.random()*16)]).join('');
+    const fmtAgo = s => s < 1 ? 'just now' : s + 's ago';
+
+    function addBlock(){
+      block++;
+      const txCount = 80 + Math.floor(Math.random() * 320);
+      const hash = '0x' + randHex(8);
+      const row = document.createElement('div');
+      row.className = 'bf-row';
+      row.dataset.t = Date.now();
+      row.innerHTML = `
+        <span class="bf-block">#${block.toLocaleString()}</span>
+        <span class="bf-hash">${hash}…${randHex(6)}</span>
+        <span class="bf-tx">${txCount} tx</span>
+        <span class="bf-time">just now</span>`;
+      list.insertBefore(row, list.firstChild);
+      while (list.children.length > 6) list.removeChild(list.lastChild);
+    }
+    // Seed initial rows
+    for (let i = 0; i < 6; i++) addBlock();
+
+    setInterval(addBlock, 1500);
+
+    // Refresh ages
+    setInterval(() => {
+      list.querySelectorAll('.bf-row').forEach(row => {
+        const t = Math.floor((Date.now() - parseInt(row.dataset.t))/1000);
+        row.querySelector('.bf-time').textContent = fmtAgo(t);
+      });
+    }, 1000);
+
+    // Drift live stats slightly
+    setInterval(() => {
+      tps += Math.floor((Math.random() - .5) * 1800);
+      tps = Math.max(28000, Math.min(60000, tps));
+      blockTime = 380 + Math.floor(Math.random() * 80);
+      tvl += (Math.random() - .48) * 0.008;
+      lvBlock.textContent = block.toLocaleString();
+      lvTps.textContent = tps.toLocaleString();
+      lvBT.innerHTML = blockTime + '<span class="unit">ms</span>';
+      lvTvl.textContent = '$' + tvl.toFixed(2) + 'B';
+    }, 1500);
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     SCROLL PROGRESS BAR
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const bar = document.getElementById('scrollProgress');
+    function tick(){
+      const st = document.documentElement.scrollTop || document.body.scrollTop;
+      const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      bar.style.width = sh > 0 ? (100 * st / sh) + '%' : '100%';
+    }
+    window.addEventListener('scroll', tick, { passive: true });
+    window.addEventListener('resize', tick);
+    tick();
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     SECTION DOTS (scroll spy)
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    const dots = document.querySelectorAll('#sectionDots a');
+    const sections = [...document.querySelectorAll('section[id]')].filter(s => s.id);
+    function update(){
+      const nearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 48;
+      const y = window.innerHeight * 0.38;
+      let cur = sections[0]?.id || 'hero';
+      if (nearBottom && sections.length) cur = sections[sections.length - 1].id;
+      else {
+        for (const s of sections) {
+          const r = s.getBoundingClientRect();
+          if (r.top <= y && r.bottom > 64) cur = s.id;
+        }
+      }
+      dots.forEach(d => d.classList.toggle('active', d.getAttribute('href') === '#' + cur));
+    }
+    window.addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
+    update();
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     HERO MESH (canvas)
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    if (document.documentElement.classList.contains('reduce-motion')) return;
+    const canvas = document.getElementById('meshCanvas');
+    const hero = document.getElementById('hero');
+    if (!canvas || !hero) return;
+    const ctx = canvas.getContext('2d');
+    let w = 0, h = 0, t = 0, running = true;
+    const io = new IntersectionObserver(([e]) => {
+      running = e.isIntersecting;
+      if (running) requestAnimationFrame(draw);
+    }, { rootMargin: '80px', threshold: 0 });
+    io.observe(hero);
+    const blobs = [
+      { ox: .25, oy: .45, r: .42, sx: .018, sy: .014, c: [26, 111, 255] },
+      { ox: .72, oy: .55, r: .38, sx: -.014, sy: .02, c: [56, 217, 255] },
+      { ox: .52, oy: .28, r: .32, sx: .01, sy: -.011, c: [111, 66, 255] },
+      { ox: .48, oy: .62, r: .28, sx: -.012, sy: -.015, c: [34, 232, 122] },
+    ];
+    function resize(){
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = hero.clientWidth;
+      h = hero.clientHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    function draw(){
+      if (!running) return;
+      t += 0.0045;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = 'screen';
+      blobs.forEach(b => {
+        const bx = w * (b.ox + Math.sin(t * 0.7 + b.ox * 6) * b.sx * 40);
+        const by = h * (b.oy + Math.cos(t * 0.55 + b.oy * 5) * b.sy * 40);
+        const rad = Math.max(w, h) * b.r * 0.55;
+        const g = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
+        g.addColorStop(0, `rgba(${b.c[0]},${b.c[1]},${b.c[2]},0.2)`);
+        g.addColorStop(0.45, `rgba(${b.c[0]},${b.c[1]},${b.c[2]},0.06)`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+      });
+      ctx.globalCompositeOperation = 'source-over';
+      requestAnimationFrame(draw);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    requestAnimationFrame(draw);
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     HERO WORD ROTATION
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    if (document.documentElement.classList.contains('reduce-motion')) return;
+    const el = document.getElementById('wordCycle');
+    if (!el) return;
+    const words = ['Tomorrow.', 'The Internet.', 'Everyone.', 'Scale.', 'DeFi.', 'Games.'];
+    let i = 0;
+    setInterval(() => {
+      el.style.opacity = '0';
+      setTimeout(() => {
+        i = (i + 1) % words.length;
+        el.textContent = words[i];
+        el.style.opacity = '1';
+      }, 220);
+    }, 2800);
+  })();
+
+  /* ─────────────────────────────────────────────────────────
+     HERO FLOAT CARD — micro ticker on TPS
+     ───────────────────────────────────────────────────────── */
+  (() => {
+    if (document.documentElement.classList.contains('reduce-motion')) return;
+    const el = document.getElementById('hfTps');
+    if (!el) return;
+    let base = 100;
+    setInterval(() => {
+      base = Math.max(98, Math.min(102, base + (Math.random() - 0.48) * 1.2));
+      el.textContent = Math.round(base) + 'K+';
+    }, 1600);
+  })();
+
+  function ftNewsSubmit(e){
+    e.preventDefault();
+    const toast = document.getElementById('ftNewsToast');
+    toast.classList.add('show');
+    e.target.reset();
+    setTimeout(() => toast.classList.remove('show'), 5000);
+    return false;
+  }
+</script>
+</body>
+</html>

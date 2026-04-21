@@ -1,0 +1,13 @@
+{
+  "name": "arc-light-labs-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Arc Light Labs marketing site with Vercel serverless API for job applications (Telegram notifications).",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  }
+}
