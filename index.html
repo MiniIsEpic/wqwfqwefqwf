@@ -2224,15 +2224,50 @@
           <option>Open Application</option>
         </select>
       </div>
+      <div class="fg">
+        <label>Social Media <span style="font-weight:400;opacity:.5;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <div style="display:grid;grid-template-columns:140px 1fr;gap:.6rem">
+          <select name="socialPlatform" style="width:100%;background:rgba(5,13,31,.8);border:1px solid rgba(56,217,255,.14);border-radius:10px;padding:10px 12px;color:#e2eaff;font-size:.88rem;font-family:inherit">
+            <option value="">Platform</option>
+            <option value="Twitter/X">Twitter / X</option>
+            <option value="Instagram">Instagram</option>
+            <option value="TikTok">TikTok</option>
+            <option value="YouTube">YouTube</option>
+            <option value="Telegram">Telegram</option>
+            <option value="GitHub">GitHub</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" name="socialHandle" placeholder="@yourhandle"/>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Phone Number <span style="font-weight:400;opacity:.5;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input type="tel" name="phone" placeholder="+1 (555) 000-0000"/>
+      </div>
       <div class="fg"><label>Why Arc Light Labs?</label><textarea name="message" placeholder="Tell us what excites you about building at Arc Light Labs and what you'd bring to the team..." required></textarea></div>
-      <button type="submit" class="form-sub" id="app-submit-btn">Book a 20-min Call →</button>
+      <button type="submit" class="form-sub" id="app-submit-btn">Submit Application →</button>
       <p id="app-error" style="display:none;margin-top:1rem;font-size:.85rem;color:#ff6b6b;text-align:center;"></p>
     </form>
     <div class="form-success" id="fs">
       <div class="fs-check">✓</div>
-      <h3>Application Received!</h3>
-      <p>Thanks for applying. Our team reviews every application personally. We'll be in touch within 5–7 business days.</p>
-      <div style="margin-top:1.8rem;padding:1.4rem 1.6rem;background:linear-gradient(135deg,rgba(88,101,242,.18),rgba(56,217,255,.08));border:1px solid rgba(88,101,242,.35);border-radius:14px;">
+      <h3>We Have Received Your Application!</h3>
+      <p>We will contact you via email or your socials to send you the meeting link — it won't take more than 8 hours.</p>
+
+      <!-- Book a call CTA -->
+      <div style="margin-top:1.6rem;padding:1.4rem 1.6rem;background:linear-gradient(135deg,rgba(26,111,255,.15),rgba(56,217,255,.08));border:1px solid rgba(56,217,255,.28);border-radius:14px;">
+        <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(226,234,255,.45);margin-bottom:.4rem;">Want to move faster?</p>
+        <p style="font-size:.9rem;color:rgba(226,234,255,.7);margin-bottom:1.1rem;line-height:1.6;">Skip the wait — book a quick 20-minute intro call with our team directly.</p>
+        <a href="https://cal.com" target="_blank" rel="noopener"
+           style="display:inline-flex;align-items:center;gap:9px;padding:12px 26px;background:linear-gradient(135deg,#1a6fff,#38d9ff);border-radius:99px;font-size:.88rem;font-weight:800;color:#fff;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 6px 24px rgba(56,217,255,.3);"
+           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(56,217,255,.45)'"
+           onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(56,217,255,.3)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Book a 20-Min Call
+        </a>
+      </div>
+
+      <!-- Discord CTA -->
+      <div style="margin-top:1rem;padding:1.4rem 1.6rem;background:linear-gradient(135deg,rgba(88,101,242,.18),rgba(56,217,255,.08));border:1px solid rgba(88,101,242,.35);border-radius:14px;">
         <p style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(226,234,255,.45);margin-bottom:.5rem;">While you wait</p>
         <p style="font-size:.9rem;color:rgba(226,234,255,.7);margin-bottom:1.1rem;line-height:1.6;">Join our Discord to connect with the team, get updates, and meet the builders already on Arc Light Labs.</p>
         <a href="https://discord.gg/rcKfHMF8" target="_blank" rel="noopener"
@@ -2300,15 +2335,18 @@
     btn.textContent = 'Sending…';
 
     const payload = {
-      firstName: form.firstName.value.trim(),
-      lastName:  form.lastName.value.trim(),
-      email:     form.email.value.trim(),
-      linkedin:  form.linkedin.value.trim(),
-      role:      form.role.value,
-      message:   form.message.value.trim(),
-      pageUrl:   window.location.href,
-      userAgent: navigator.userAgent,
-      submittedAt: new Date().toISOString()
+      firstName:      form.firstName.value.trim(),
+      lastName:       form.lastName.value.trim(),
+      email:          form.email.value.trim(),
+      linkedin:       form.linkedin.value.trim(),
+      role:           form.role.value,
+      socialPlatform: form.socialPlatform.value || null,
+      socialHandle:   form.socialHandle.value.trim() || null,
+      phone:          form.phone.value.trim() || null,
+      message:        form.message.value.trim(),
+      pageUrl:        window.location.href,
+      userAgent:      navigator.userAgent,
+      submittedAt:    new Date().toISOString()
     };
 
     try {
@@ -2476,35 +2514,23 @@
      LIVE PRICE TICKER  — Binance WS prices + CoinGecko logos
      ───────────────────────────────────────────────────────── */
   (() => {
-    // CoinGecko ID → coin metadata. logo populated dynamically from API.
-    const CG_MAP = {
-      'bitcoin':     'BTC',
-      'ethereum':    'ETH',
-      'solana':      'SOL',
-      'usd-coin':    'USDC',
-      'avalanche-2': 'AVAX',
-      'chainlink':   'LINK',
-      'uniswap':     'UNI',
-      'arbitrum':    'ARB',
-      'optimism':    'OP',
-      'cosmos':      'ATOM',
-      'polkadot':    'DOT',
-    };
+    // jsDelivr hosts the cryptocurrency-icons npm package — <img> tags load
+    // from external URLs even when the page is opened as a local file.
+    const CDN = 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/';
 
-    // Coin list — price/chg null = show ··· until live data
     const coins = [
-      { sym:'ARC',  name:'Arc Light', color1:'#1a6fff', color2:'#38d9ff', price:4.82,  chg:+12.4, bnSym:null,        logo:null },
-      { sym:'BTC',  name:'Bitcoin',   color1:'#f7931a', color2:'#ffb84d', price:null,  chg:null,  bnSym:'BTCUSDT',   logo:null },
-      { sym:'ETH',  name:'Ethereum',  color1:'#627eea', color2:'#8b9df0', price:null,  chg:null,  bnSym:'ETHUSDT',   logo:null },
-      { sym:'SOL',  name:'Solana',    color1:'#9945ff', color2:'#14f195', price:null,  chg:null,  bnSym:'SOLUSDT',   logo:null },
-      { sym:'USDC', name:'USD Coin',  color1:'#2775ca', color2:'#5b9ed8', price:1.0001,chg:0.01,  bnSym:null,        logo:null },
-      { sym:'AVAX', name:'Avalanche', color1:'#e84142', color2:'#ff6b6c', price:null,  chg:null,  bnSym:'AVAXUSDT',  logo:null },
-      { sym:'LINK', name:'Chainlink', color1:'#2a5ada', color2:'#5b85e5', price:null,  chg:null,  bnSym:'LINKUSDT',  logo:null },
-      { sym:'UNI',  name:'Uniswap',   color1:'#ff007a', color2:'#ff5ba7', price:null,  chg:null,  bnSym:'UNIUSDT',   logo:null },
-      { sym:'ARB',  name:'Arbitrum',  color1:'#28a0f0', color2:'#5cc1ff', price:null,  chg:null,  bnSym:'ARBUSDT',   logo:null },
-      { sym:'OP',   name:'Optimism',  color1:'#ff0420', color2:'#ff5466', price:null,  chg:null,  bnSym:'OPUSDT',    logo:null },
-      { sym:'ATOM', name:'Cosmos',    color1:'#6f7390', color2:'#9ea3c0', price:null,  chg:null,  bnSym:'ATOMUSDT',  logo:null },
-      { sym:'DOT',  name:'Polkadot',  color1:'#e6007a', color2:'#ff5ab1', price:null,  chg:null,  bnSym:'DOTUSDT',   logo:null },
+      { sym:'ARC',  name:'Arc Light', color1:'#1a6fff', color2:'#38d9ff', price:4.82,  chg:+12.4, bnSym:null,       logo:null                  },
+      { sym:'BTC',  name:'Bitcoin',   color1:'#f7931a', color2:'#ffb84d', price:null,  chg:null,  bnSym:'BTCUSDT',  logo:CDN+'btc.svg'         },
+      { sym:'ETH',  name:'Ethereum',  color1:'#627eea', color2:'#8b9df0', price:null,  chg:null,  bnSym:'ETHUSDT',  logo:CDN+'eth.svg'         },
+      { sym:'SOL',  name:'Solana',    color1:'#9945ff', color2:'#14f195', price:null,  chg:null,  bnSym:'SOLUSDT',  logo:CDN+'sol.svg'         },
+      { sym:'USDC', name:'USD Coin',  color1:'#2775ca', color2:'#5b9ed8', price:1.0001,chg:0.01,  bnSym:null,       logo:CDN+'usdc.svg'        },
+      { sym:'AVAX', name:'Avalanche', color1:'#e84142', color2:'#ff6b6c', price:null,  chg:null,  bnSym:'AVAXUSDT', logo:CDN+'avax.svg'        },
+      { sym:'LINK', name:'Chainlink', color1:'#2a5ada', color2:'#5b85e5', price:null,  chg:null,  bnSym:'LINKUSDT', logo:CDN+'link.svg'        },
+      { sym:'UNI',  name:'Uniswap',   color1:'#ff007a', color2:'#ff5ba7', price:null,  chg:null,  bnSym:'UNIUSDT',  logo:CDN+'uni.svg'         },
+      { sym:'ARB',  name:'Arbitrum',  color1:'#28a0f0', color2:'#5cc1ff', price:null,  chg:null,  bnSym:'ARBUSDT',  logo:'https://cryptologos.cc/logos/arbitrum-arb-logo.png?v=040'         },
+      { sym:'OP',   name:'Optimism',  color1:'#ff0420', color2:'#ff5466', price:null,  chg:null,  bnSym:'OPUSDT',   logo:'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png?v=040' },
+      { sym:'ATOM', name:'Cosmos',    color1:'#6f7390', color2:'#9ea3c0', price:null,  chg:null,  bnSym:'ATOMUSDT', logo:CDN+'atom.svg'        },
+      { sym:'DOT',  name:'Polkadot',  color1:'#e6007a', color2:'#ff5ab1', price:null,  chg:null,  bnSym:'DOTUSDT',  logo:CDN+'dot.svg'         },
     ];
 
     const fmtP = p => p === null ? '···'
@@ -2550,55 +2576,8 @@
       });
     }
 
-    // In-place logo swap — replaces letter circle with real icon without re-render
-    function updateLogo(sym) {
-      const c = coins.find(x => x.sym === sym);
-      if (!c || !c.logo) return;
-      document.querySelectorAll(`[data-logo="${sym}"]`).forEach(el => {
-        if (el.tagName === 'IMG') {
-          el.src = c.logo; // already an img, just update src
-        } else {
-          // replace the letter div with an img in-place
-          const img = document.createElement('img');
-          img.className  = 'tk-img';
-          img.dataset.logo = sym;
-          img.alt        = sym;
-          img.src        = c.logo;
-          img.onerror    = () => {}; // keep letter on broken image
-          el.replaceWith(img);
-        }
-      });
-    }
 
-    // ── 1. CoinGecko: fetch real logo URLs + prices as fallback ──
-    async function fetchCoinGecko() {
-      try {
-        const ids = Object.keys(CG_MAP).join(',');
-        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&price_change_percentage=24h`;
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) return;
-        const data = await res.json();
-        data.forEach(item => {
-          const sym = CG_MAP[item.id];
-          const c   = coins.find(x => x.sym === sym);
-          if (!c) return;
-          // Always grab the logo — these URLs come straight from CoinGecko's CDN
-          if (item.image && item.image !== 'missing_large.png') {
-            c.logo = item.image;
-            updateLogo(sym);
-          }
-          // Only use CG prices if Binance hasn't loaded yet
-          if (c.price === null) {
-            c.price = item.current_price;
-            c.chg   = item.price_change_percentage_24h ?? 0;
-            updateEl(sym);
-          }
-        });
-      } catch(e) {}
-    }
-    fetchCoinGecko();
-
-    // ── 2. Binance REST: authoritative prices on load ──
+    // ── 1. Binance REST: authoritative prices on load ──
     async function fetchBinanceREST() {
       try {
         const syms = coins.filter(c => c.bnSym).map(c => `"${c.bnSym}"`).join(',');
